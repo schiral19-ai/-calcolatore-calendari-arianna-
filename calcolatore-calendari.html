@@ -621,6 +621,7 @@
             const [esclusioni, setEsclusioni] = useState([]);
             const [calendariEspansi, setCalendariEspansi] = useState([]);
             const [nomiDocenti, setNomiDocenti] = useState([]);
+            const [modificheOrari, setModificheOrari] = useState({});
             const [distribuzioneOre, setDistribuzioneOre] = useState({
                 modalita: 'automatica', // 'automatica' o 'personalizzata'
                 opzioneScelta: null, // indice opzione automatica scelta
@@ -1092,12 +1093,16 @@
                         const row = worksheet.getRow(rowNum);
                         const isEven = lezioneIdx % 2 === 0;
                         const bgColor = isEven ? 'FFFFFFFF' : 'FFF9FAFB';
-                        
+
+                        // Ottieni orari modificati o originali
+                        const orari = getOrarioLezione(idx, lezioneIdx, lezione);
+                        const orarioCompleto = `${orari.orarioInizio} - ${orari.orarioFine}`;
+
                         const rowData = [
                             lezione.data.toLocaleDateString('it-IT'),
                             lezione.giorno,
-                            lezione.orario,
-                            lezione.ore,
+                            orarioCompleto,
+                            orari.ore,
                             lezione.modulo,
                             lezione.argomenti
                         ];
@@ -1129,8 +1134,9 @@
                     // Riga TOTALE (ultima riga)
                     const totaleRowNum = calendario.lezioni.length + 5;
                     const totaleRow = worksheet.getRow(totaleRowNum);
-                    
-                    ['', '', 'TOTALE ORE:', parametri.oreTotali, '', ''].forEach((value, colIdx) => {
+                    const totaleOreCalendario = calcolaTotaleOreCalendario(idx);
+
+                    ['', '', 'TOTALE ORE:', totaleOreCalendario, '', ''].forEach((value, colIdx) => {
                         const cell = totaleRow.getCell(colIdx + 1);
                         cell.value = value;
                         cell.font = { bold: true, size: 11 };
@@ -1170,6 +1176,82 @@
                 } else {
                     setCalendariEspansi([...calendariEspansi, indice]);
                 }
+            };
+
+            // Funzione per calcolare ore dalla differenza tra orari
+            const calcolaOreDaOrari = (orarioInizio, orarioFine) => {
+                if (!orarioInizio || !orarioFine) return 0;
+                const [oreI, minI] = orarioInizio.split(':').map(Number);
+                const [oreF, minF] = orarioFine.split(':').map(Number);
+                const minutiInizio = oreI * 60 + minI;
+                const minutiFine = oreF * 60 + minF;
+                return ((minutiFine - minutiInizio) / 60).toFixed(1);
+            };
+
+            // Funzione per modificare l'orario di una lezione
+            const modificaOrarioLezione = (calendarioIdx, lezioneIdx, campo, valore) => {
+                const chiave = `${calendarioIdx}-${lezioneIdx}`;
+                const modificaCorrente = modificheOrari[chiave] || {};
+
+                const nuovaModifica = {
+                    ...modificaCorrente,
+                    [campo]: valore
+                };
+
+                // Calcola le ore se abbiamo entrambi gli orari
+                if (nuovaModifica.orarioInizio && nuovaModifica.orarioFine) {
+                    nuovaModifica.ore = calcolaOreDaOrari(nuovaModifica.orarioInizio, nuovaModifica.orarioFine);
+                }
+
+                setModificheOrari({
+                    ...modificheOrari,
+                    [chiave]: nuovaModifica
+                });
+            };
+
+            // Funzione per ottenere l'orario di una lezione (modificato o originale)
+            const getOrarioLezione = (calendarioIdx, lezioneIdx, lezione) => {
+                const chiave = `${calendarioIdx}-${lezioneIdx}`;
+                const modifica = modificheOrari[chiave];
+
+                if (modifica && modifica.orarioInizio && modifica.orarioFine) {
+                    return {
+                        orarioInizio: modifica.orarioInizio,
+                        orarioFine: modifica.orarioFine,
+                        ore: parseFloat(modifica.ore)
+                    };
+                }
+
+                // Parsing orario originale
+                let orarioInizio, orarioFine;
+                if (lezione.orario.includes('/')) {
+                    // Formato con pausa: "09:00-13:00 / 14:00-17:00"
+                    const parti = lezione.orario.split(' / ');
+                    orarioInizio = parti[0].split('-')[0].trim();
+                    orarioFine = parti[1].split('-')[1].trim();
+                } else {
+                    // Formato continuo: "09:00 - 14:00"
+                    const parti = lezione.orario.split(' - ');
+                    orarioInizio = parti[0].trim();
+                    orarioFine = parti[1].trim();
+                }
+
+                return {
+                    orarioInizio,
+                    orarioFine,
+                    ore: lezione.ore
+                };
+            };
+
+            // Funzione per calcolare il totale ore di un calendario
+            const calcolaTotaleOreCalendario = (calendarioIdx) => {
+                const calendario = calendari[calendarioIdx];
+                if (!calendario) return 0;
+
+                return calendario.lezioni.reduce((totale, lezione, lezioneIdx) => {
+                    const orari = getOrarioLezione(calendarioIdx, lezioneIdx, lezione);
+                    return totale + orari.ore;
+                }, 0);
             };
 
             const aggiornaNumeroDocenti = (numero) => {
@@ -2054,31 +2136,68 @@
                                                                     <tr>
                                                                         <th>Data</th>
                                                                         <th>Giorno</th>
-                                                                        <th>Orario</th>
+                                                                        <th>Orario Inizio</th>
+                                                                        <th>Orario Fine</th>
                                                                         <th>Ore</th>
                                                                         <th>Modulo</th>
                                                                         <th>Argomenti</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    {lezioniDaMostrare.map((lezione, lidx) => (
-                                                                        <tr key={lidx}>
-                                                                            <td>{lezione.data.toLocaleDateString('it-IT')}</td>
-                                                                            <td>{lezione.giorno}</td>
-                                                                            <td>{lezione.orario}</td>
-                                                                            <td style={{textAlign: 'center'}}>{lezione.ore}h</td>
-                                                                            <td>{lezione.modulo}</td>
-                                                                            <td style={{fontSize: '0.75rem'}}>
-                                                                                {isEspanso ? lezione.argomenti : (
-                                                                                    <>
-                                                                                        {lezione.argomenti.substring(0, 80)}{lezione.argomenti.length > 80 ? '...' : ''}
-                                                                                    </>
-                                                                                )}
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))}
+                                                                    {lezioniDaMostrare.map((lezione, lidx) => {
+                                                                        const lezioneIdx = calendario.lezioni.indexOf(lezione);
+                                                                        const orari = getOrarioLezione(idx, lezioneIdx, lezione);
+
+                                                                        return (
+                                                                            <tr key={lidx}>
+                                                                                <td>{lezione.data.toLocaleDateString('it-IT')}</td>
+                                                                                <td>{lezione.giorno}</td>
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="time"
+                                                                                        value={orari.orarioInizio}
+                                                                                        onChange={(e) => modificaOrarioLezione(idx, lezioneIdx, 'orarioInizio', e.target.value)}
+                                                                                        style={{width: '100%', padding: '0.25rem', border: '1px solid #ddd', borderRadius: '4px'}}
+                                                                                    />
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="time"
+                                                                                        value={orari.orarioFine}
+                                                                                        onChange={(e) => modificaOrarioLezione(idx, lezioneIdx, 'orarioFine', e.target.value)}
+                                                                                        style={{width: '100%', padding: '0.25rem', border: '1px solid #ddd', borderRadius: '4px'}}
+                                                                                    />
+                                                                                </td>
+                                                                                <td style={{textAlign: 'center', fontWeight: 'bold'}}>{orari.ore}h</td>
+                                                                                <td>{lezione.modulo}</td>
+                                                                                <td style={{fontSize: '0.75rem'}}>
+                                                                                    {isEspanso ? lezione.argomenti : (
+                                                                                        <>
+                                                                                            {lezione.argomenti.substring(0, 80)}{lezione.argomenti.length > 80 ? '...' : ''}
+                                                                                        </>
+                                                                                    )}
+                                                                                </td>
+                                                                            </tr>
+                                                                        );
+                                                                    })}
                                                                 </tbody>
                                                             </table>
+                                                        </div>
+                                                        <div style={{
+                                                            marginTop: '1rem',
+                                                            padding: '0.75rem',
+                                                            backgroundColor: calcolaTotaleOreCalendario(idx) === parametri.oreTotali ? '#d1fae5' : '#fee2e2',
+                                                            borderRadius: '0.5rem',
+                                                            textAlign: 'center',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '1rem'
+                                                        }}>
+                                                            {calcolaTotaleOreCalendario(idx) === parametri.oreTotali ? '✅' : '⚠️'} Totale Ore: {calcolaTotaleOreCalendario(idx)}h / {parametri.oreTotali}h
+                                                            {calcolaTotaleOreCalendario(idx) !== parametri.oreTotali && (
+                                                                <span style={{display: 'block', fontSize: '0.875rem', marginTop: '0.25rem'}}>
+                                                                    Differenza: {(calcolaTotaleOreCalendario(idx) - parametri.oreTotali).toFixed(1)}h
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         {calendario.lezioni.length > 5 && (
                                                             <button 
