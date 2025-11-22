@@ -35,6 +35,17 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
+        .header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
         .header h1 {
             font-size: 1.875rem;
             font-weight: bold;
@@ -46,6 +57,22 @@
         .header p {
             color: #d1d5db;
             margin-top: 0.5rem;
+        }
+
+        .header-logo {
+            height: 60px;
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-logo {
+                height: 50px;
+            }
         }
 
         .section {
@@ -1396,13 +1423,16 @@
                 <div>
                     <div className="header">
                         <div className="container">
-                            <h1>
-                                <svg className="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Generatore Calendari Corsi 2026
-                            </h1>
-                            <p>SONODIGITALE - Tool per Arianna @ Atoma srl</p>
+                            <div className="header-content">
+                                <h1>
+                                    <svg className="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Generatore Calendari Corsi 2026
+                                </h1>
+                                <p>SONODIGITALE - Tool per Arianna @ Atoma srl</p>
+                            </div>
+                            <img src="SONODIGITALE 1000X1000.png" alt="SONODIGITALE Logo" className="header-logo" />
                         </div>
                     </div>
 
