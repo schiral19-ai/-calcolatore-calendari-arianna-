@@ -790,17 +790,30 @@
                 // Non rigenerare se il numero è lo stesso
                 if (programma.length === numLezioni) return;
 
+                const arrayOreGiornate = getArrayOreGiornate();
                 const nuoveProgramma = [];
                 for (let i = 0; i < numLezioni; i++) {
+                    const oreGiorno = arrayOreGiornate[i] || parametri.oreGiorno;
+
+                    // Calcola orari di default in base alle ore
+                    const [oreInizio, minInizio] = parametri.orarioInizio.split(':').map(Number);
+                    const minutiInizio = oreInizio * 60 + minInizio;
+                    const minutiFine = minutiInizio + (oreGiorno * 60);
+                    const oreFine = Math.floor(minutiFine / 60);
+                    const minFine = minutiFine % 60;
+                    const orarioFineCalcolato = `${String(oreFine).padStart(2, '0')}:${String(minFine).padStart(2, '0')}`;
+
                     nuoveProgramma.push({
                         giorno: i + 1,
                         modulo: '',
                         argomenti: '',
                         tipoLezione: 'default',
-                        oreGiornata: null,
+                        oreGiornata: oreGiorno,
                         fasciaOraria: 'default',
-                        orarioInizio: '',
-                        orarioFine: ''
+                        orarioInizio: parametri.orarioInizio,
+                        orarioFine: orarioFineCalcolato,
+                        pausaInizio: '',
+                        pausaFine: ''
                     });
                 }
                 setProgramma(nuoveProgramma);
@@ -815,7 +828,9 @@
                     oreGiornata: null,
                     fasciaOraria: 'default',
                     orarioInizio: '',
-                    orarioFine: ''
+                    orarioFine: '',
+                    pausaInizio: '',
+                    pausaFine: ''
                 }]);
             };
 
@@ -825,10 +840,51 @@
                 setProgramma(nuovoProgramma);
             };
 
+            // Funzione per calcolare ore da orari e pausa
+            const calcolaOreGiornata = (orarioInizio, orarioFine, pausaInizio, pausaFine) => {
+                if (!orarioInizio || !orarioFine) return null;
+
+                const [oreI, minI] = orarioInizio.split(':').map(Number);
+                const [oreF, minF] = orarioFine.split(':').map(Number);
+                let minutiTotali = (oreF * 60 + minF) - (oreI * 60 + minI);
+
+                // Sottrai pausa se presente
+                if (pausaInizio && pausaFine) {
+                    const [orePI, minPI] = pausaInizio.split(':').map(Number);
+                    const [orePF, minPF] = pausaFine.split(':').map(Number);
+                    const minutiPausa = (orePF * 60 + minPF) - (orePI * 60 + minPI);
+                    minutiTotali -= minutiPausa;
+                }
+
+                return (minutiTotali / 60).toFixed(1);
+            };
+
             const aggiornaLezione = (index, campo, valore) => {
                 const nuovoProgramma = [...programma];
                 nuovoProgramma[index][campo] = valore;
+
+                // Ricalcola ore giornata quando cambiano orari o pausa
+                if (['orarioInizio', 'orarioFine', 'pausaInizio', 'pausaFine'].includes(campo)) {
+                    const lezione = nuovoProgramma[index];
+                    const ore = calcolaOreGiornata(
+                        lezione.orarioInizio,
+                        lezione.orarioFine,
+                        lezione.pausaInizio,
+                        lezione.pausaFine
+                    );
+                    if (ore !== null) {
+                        nuovoProgramma[index].oreGiornata = parseFloat(ore);
+                    }
+                }
+
                 setProgramma(nuovoProgramma);
+            };
+
+            // Funzione per calcolare il totale ore del programma
+            const calcolaTotaleOreProgramma = () => {
+                return programma.reduce((totale, lezione) => {
+                    return totale + (lezione.oreGiornata || 0);
+                }, 0);
             };
 
             const aggiungiEsclusione = () => {
@@ -985,43 +1041,23 @@
 
             // Funzione per calcolare orari e ore in base ai parametri del modulo
             const calcolaOrariLezione = (prog, arrayOreGiornate, giorniContati) => {
-                // Determina ore giornata
-                let oreGiornata = prog.oreGiornata || arrayOreGiornate[giorniContati] || parametri.oreGiorno;
+                // Usa ore giornata dal programma (già calcolate automaticamente)
+                const oreGiornata = prog.oreGiornata || arrayOreGiornate[giorniContati] || parametri.oreGiorno;
 
                 // Determina orari
                 let orario;
-                let orarioInizioCalcolato;
-                let orarioFineCalcolato;
 
-                if (prog.fasciaOraria === 'personalizzato' && prog.orarioInizio && prog.orarioFine) {
-                    // Usa orari personalizzati
-                    orarioInizioCalcolato = prog.orarioInizio;
-                    orarioFineCalcolato = prog.orarioFine;
-                    orario = `${orarioInizioCalcolato} - ${orarioFineCalcolato}`;
-
-                    // Ricalcola ore in base agli orari effettivi
-                    const [oreI, minI] = orarioInizioCalcolato.split(':').map(Number);
-                    const [oreF, minF] = orarioFineCalcolato.split(':').map(Number);
-                    const minutiTotali = (oreF * 60 + minF) - (oreI * 60 + minI);
-                    oreGiornata = minutiTotali / 60;
-                } else if (prog.fasciaOraria === 'mattina') {
-                    // Mattina: 09:00-13:00 (4h) o 09:00-16:00 (7h con pausa)
-                    if (oreGiornata === 7) {
-                        orario = "09:00-13:00 / 14:00-17:00";
+                // Se il programma ha orari impostati, usali
+                if (prog.orarioInizio && prog.orarioFine) {
+                    // Se c'è una pausa, genera orario con pausa
+                    if (prog.pausaInizio && prog.pausaFine) {
+                        orario = `${prog.orarioInizio}-${prog.pausaInizio} / ${prog.pausaFine}-${prog.orarioFine}`;
                     } else {
-                        const oreFine = 9 + oreGiornata;
-                        orario = `09:00 - ${String(Math.floor(oreFine)).padStart(2, '0')}:${String((oreFine % 1) * 60).padStart(2, '0')}`;
-                    }
-                } else if (prog.fasciaOraria === 'pomeriggio') {
-                    // Pomeriggio: 14:00-18:00 (4h) o 14:00-21:00 (7h con pausa)
-                    if (oreGiornata === 7) {
-                        orario = "14:00-18:00 / 19:00-22:00";
-                    } else {
-                        const oreFine = 14 + oreGiornata;
-                        orario = `14:00 - ${String(Math.floor(oreFine)).padStart(2, '0')}:${String((oreFine % 1) * 60).padStart(2, '0')}`;
+                        // Orario continuo
+                        orario = `${prog.orarioInizio} - ${prog.orarioFine}`;
                     }
                 } else {
-                    // Default: usa parametri globali
+                    // Default: calcola da parametri globali
                     if (oreGiornata === 7) {
                         orario = "09:00-13:00 / 14:00-17:00";
                     } else {
@@ -2095,15 +2131,18 @@
                                     {programma.map((lezione, index) => (
                                         <div key={index} style={{marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem', border: '2px solid #e5e7eb'}}>
                                             <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem'}}>
-                                                <div style={{fontWeight: 'bold', fontSize: '1rem', minWidth: '80px'}}>Giorno {lezione.giorno}</div>
+                                                <div style={{fontWeight: 'bold', fontSize: '1rem', minWidth: '80px', color: '#196C28'}}>Giorno {lezione.giorno}</div>
                                                 <input
                                                     type="text"
                                                     value={lezione.modulo}
                                                     onChange={(e) => aggiornaLezione(index, 'modulo', e.target.value)}
                                                     className="form-input"
-                                                    placeholder="Modulo"
+                                                    placeholder="Nome Modulo"
                                                     style={{flex: 1}}
                                                 />
+                                                <div style={{fontSize: '0.875rem', fontWeight: 'bold', color: lezione.oreGiornata ? '#196C28' : '#999', minWidth: '60px', textAlign: 'right'}}>
+                                                    {lezione.oreGiornata ? `${lezione.oreGiornata}h` : '—'}
+                                                </div>
                                                 <button onClick={() => rimuoviLezione(index)} className="btn btn-remove">
                                                     <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -2118,75 +2157,74 @@
                                                 placeholder="Argomenti della lezione"
                                                 style={{marginBottom: '0.75rem'}}
                                             />
-                                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem'}}>
-                                                <div>
-                                                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Tipo Lezione</label>
-                                                    <select
-                                                        value={lezione.tipoLezione || 'default'}
-                                                        onChange={(e) => aggiornaLezione(index, 'tipoLezione', e.target.value)}
-                                                        className="form-select"
-                                                        style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db'}}
-                                                    >
-                                                        <option value="default">Usa default</option>
-                                                        <option value="online">🌐 Online</option>
-                                                        <option value="presenza">🏫 In Presenza</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Ore Giornata</label>
-                                                    <input
-                                                        type="number"
-                                                        min="3"
-                                                        max="7"
-                                                        step="0.5"
-                                                        value={lezione.oreGiornata || ''}
-                                                        onChange={(e) => aggiornaLezione(index, 'oreGiornata', e.target.value ? parseFloat(e.target.value) : null)}
-                                                        className="form-input"
-                                                        placeholder="Default"
-                                                        style={{width: '100%'}}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Fascia Oraria</label>
-                                                    <select
-                                                        value={lezione.fasciaOraria || 'default'}
-                                                        onChange={(e) => aggiornaLezione(index, 'fasciaOraria', e.target.value)}
-                                                        className="form-select"
-                                                        style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db'}}
-                                                    >
-                                                        <option value="default">Usa default</option>
-                                                        <option value="mattina">☀️ Mattina</option>
-                                                        <option value="pomeriggio">🌙 Pomeriggio</option>
-                                                        <option value="personalizzato">⚙️ Personalizzato</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            {lezione.fasciaOraria === 'personalizzato' && (
-                                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem'}}>
+
+                                            <div style={{backgroundColor: 'white', padding: '0.75rem', borderRadius: '0.375rem', marginBottom: '0.75rem'}}>
+                                                <div style={{fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.5rem'}}>⏰ ORARI</div>
+                                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
                                                     <div>
-                                                        <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Orario Inizio</label>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Inizio</label>
                                                         <input
                                                             type="time"
                                                             value={lezione.orarioInizio || ''}
                                                             onChange={(e) => aggiornaLezione(index, 'orarioInizio', e.target.value)}
                                                             className="form-input"
-                                                            style={{width: '100%'}}
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Orario Fine</label>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Fine</label>
                                                         <input
                                                             type="time"
                                                             value={lezione.orarioFine || ''}
                                                             onChange={(e) => aggiornaLezione(index, 'orarioFine', e.target.value)}
                                                             className="form-input"
-                                                            style={{width: '100%'}}
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Pausa Da</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.pausaInizio || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'pausaInizio', e.target.value)}
+                                                            className="form-input"
+                                                            placeholder="Opzionale"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Pausa A</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.pausaFine || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'pausaFine', e.target.value)}
+                                                            className="form-input"
+                                                            placeholder="Opzionale"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
                                                         />
                                                     </div>
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                     ))}
+                                </div>
+
+                                {/* Totale Ore */}
+                                <div style={{
+                                    marginTop: '1.5rem',
+                                    padding: '1rem',
+                                    backgroundColor: calcolaTotaleOreProgramma() === parametri.oreTotali ? '#d1fae5' : '#fee2e2',
+                                    borderRadius: '0.5rem',
+                                    border: `2px solid ${calcolaTotaleOreProgramma() === parametri.oreTotali ? '#196C28' : '#dc2626'}`,
+                                    textAlign: 'center',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {calcolaTotaleOreProgramma() === parametri.oreTotali ? '✅' : '⚠️'} Totale Ore Programma: {calcolaTotaleOreProgramma()}h / {parametri.oreTotali}h
+                                    {calcolaTotaleOreProgramma() !== parametri.oreTotali && (
+                                        <div style={{fontSize: '0.875rem', marginTop: '0.5rem', color: '#dc2626'}}>
+                                            Differenza: {(calcolaTotaleOreProgramma() - parametri.oreTotali).toFixed(1)}h
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -2262,68 +2300,31 @@
                                                                     <tr>
                                                                         <th>Data</th>
                                                                         <th>Giorno</th>
-                                                                        <th>Orario Inizio</th>
-                                                                        <th>Orario Fine</th>
+                                                                        <th>Orario</th>
                                                                         <th>Ore</th>
                                                                         <th>Modulo</th>
                                                                         <th>Argomenti</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    {lezioniDaMostrare.map((lezione, lidx) => {
-                                                                        const lezioneIdx = calendario.lezioni.indexOf(lezione);
-                                                                        const orari = getOrarioLezione(idx, lezioneIdx, lezione);
-
-                                                                        return (
-                                                                            <tr key={lidx}>
-                                                                                <td>{lezione.data.toLocaleDateString('it-IT')}</td>
-                                                                                <td>{lezione.giorno}</td>
-                                                                                <td>
-                                                                                    <input
-                                                                                        type="time"
-                                                                                        value={orari.orarioInizio}
-                                                                                        onChange={(e) => modificaOrarioLezione(idx, lezioneIdx, 'orarioInizio', e.target.value)}
-                                                                                        style={{width: '100%', padding: '0.25rem', border: '1px solid #ddd', borderRadius: '4px'}}
-                                                                                    />
-                                                                                </td>
-                                                                                <td>
-                                                                                    <input
-                                                                                        type="time"
-                                                                                        value={orari.orarioFine}
-                                                                                        onChange={(e) => modificaOrarioLezione(idx, lezioneIdx, 'orarioFine', e.target.value)}
-                                                                                        style={{width: '100%', padding: '0.25rem', border: '1px solid #ddd', borderRadius: '4px'}}
-                                                                                    />
-                                                                                </td>
-                                                                                <td style={{textAlign: 'center', fontWeight: 'bold'}}>{orari.ore}h</td>
-                                                                                <td>{lezione.modulo}</td>
-                                                                                <td style={{fontSize: '0.75rem'}}>
-                                                                                    {isEspanso ? lezione.argomenti : (
-                                                                                        <>
-                                                                                            {lezione.argomenti.substring(0, 80)}{lezione.argomenti.length > 80 ? '...' : ''}
-                                                                                        </>
-                                                                                    )}
-                                                                                </td>
-                                                                            </tr>
-                                                                        );
-                                                                    })}
+                                                                    {lezioniDaMostrare.map((lezione, lidx) => (
+                                                                        <tr key={lidx}>
+                                                                            <td>{lezione.data.toLocaleDateString('it-IT')}</td>
+                                                                            <td>{lezione.giorno}</td>
+                                                                            <td>{lezione.orario}</td>
+                                                                            <td style={{textAlign: 'center'}}>{lezione.ore}h</td>
+                                                                            <td>{lezione.modulo}</td>
+                                                                            <td style={{fontSize: '0.75rem'}}>
+                                                                                {isEspanso ? lezione.argomenti : (
+                                                                                    <>
+                                                                                        {lezione.argomenti.substring(0, 80)}{lezione.argomenti.length > 80 ? '...' : ''}
+                                                                                    </>
+                                                                                )}
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
                                                                 </tbody>
                                                             </table>
-                                                        </div>
-                                                        <div style={{
-                                                            marginTop: '1rem',
-                                                            padding: '0.75rem',
-                                                            backgroundColor: calcolaTotaleOreCalendario(idx) === parametri.oreTotali ? '#d1fae5' : '#fee2e2',
-                                                            borderRadius: '0.5rem',
-                                                            textAlign: 'center',
-                                                            fontWeight: 'bold',
-                                                            fontSize: '1rem'
-                                                        }}>
-                                                            {calcolaTotaleOreCalendario(idx) === parametri.oreTotali ? '✅' : '⚠️'} Totale Ore: {calcolaTotaleOreCalendario(idx)}h / {parametri.oreTotali}h
-                                                            {calcolaTotaleOreCalendario(idx) !== parametri.oreTotali && (
-                                                                <span style={{display: 'block', fontSize: '0.875rem', marginTop: '0.25rem'}}>
-                                                                    Differenza: {(calcolaTotaleOreCalendario(idx) - parametri.oreTotali).toFixed(1)}h
-                                                                </span>
-                                                            )}
                                                         </div>
                                                         {calendario.lezioni.length > 5 && (
                                                             <button 
