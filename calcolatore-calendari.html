@@ -789,20 +789,34 @@
             const generaLezioniVuote = (numLezioni) => {
                 // Non rigenerare se il numero è lo stesso
                 if (programma.length === numLezioni) return;
-                
+
                 const nuoveProgramma = [];
                 for (let i = 0; i < numLezioni; i++) {
                     nuoveProgramma.push({
                         giorno: i + 1,
                         modulo: '',
-                        argomenti: ''
+                        argomenti: '',
+                        tipoLezione: 'default',
+                        oreGiornata: null,
+                        fasciaOraria: 'default',
+                        orarioInizio: '',
+                        orarioFine: ''
                     });
                 }
                 setProgramma(nuoveProgramma);
             };
 
             const aggiungiLezione = () => {
-                setProgramma([...programma, { giorno: programma.length + 1, modulo: '', argomenti: '' }]);
+                setProgramma([...programma, {
+                    giorno: programma.length + 1,
+                    modulo: '',
+                    argomenti: '',
+                    tipoLezione: 'default',
+                    oreGiornata: null,
+                    fasciaOraria: 'default',
+                    orarioInizio: '',
+                    orarioFine: ''
+                }]);
             };
 
             const rimuoviLezione = (index) => {
@@ -969,6 +983,61 @@
                 generaCalendari(corsiTotali, giorniNecessari);
             };
 
+            // Funzione per calcolare orari e ore in base ai parametri del modulo
+            const calcolaOrariLezione = (prog, arrayOreGiornate, giorniContati) => {
+                // Determina ore giornata
+                let oreGiornata = prog.oreGiornata || arrayOreGiornate[giorniContati] || parametri.oreGiorno;
+
+                // Determina orari
+                let orario;
+                let orarioInizioCalcolato;
+                let orarioFineCalcolato;
+
+                if (prog.fasciaOraria === 'personalizzato' && prog.orarioInizio && prog.orarioFine) {
+                    // Usa orari personalizzati
+                    orarioInizioCalcolato = prog.orarioInizio;
+                    orarioFineCalcolato = prog.orarioFine;
+                    orario = `${orarioInizioCalcolato} - ${orarioFineCalcolato}`;
+
+                    // Ricalcola ore in base agli orari effettivi
+                    const [oreI, minI] = orarioInizioCalcolato.split(':').map(Number);
+                    const [oreF, minF] = orarioFineCalcolato.split(':').map(Number);
+                    const minutiTotali = (oreF * 60 + minF) - (oreI * 60 + minI);
+                    oreGiornata = minutiTotali / 60;
+                } else if (prog.fasciaOraria === 'mattina') {
+                    // Mattina: 09:00-13:00 (4h) o 09:00-16:00 (7h con pausa)
+                    if (oreGiornata === 7) {
+                        orario = "09:00-13:00 / 14:00-17:00";
+                    } else {
+                        const oreFine = 9 + oreGiornata;
+                        orario = `09:00 - ${String(Math.floor(oreFine)).padStart(2, '0')}:${String((oreFine % 1) * 60).padStart(2, '0')}`;
+                    }
+                } else if (prog.fasciaOraria === 'pomeriggio') {
+                    // Pomeriggio: 14:00-18:00 (4h) o 14:00-21:00 (7h con pausa)
+                    if (oreGiornata === 7) {
+                        orario = "14:00-18:00 / 19:00-22:00";
+                    } else {
+                        const oreFine = 14 + oreGiornata;
+                        orario = `14:00 - ${String(Math.floor(oreFine)).padStart(2, '0')}:${String((oreFine % 1) * 60).padStart(2, '0')}`;
+                    }
+                } else {
+                    // Default: usa parametri globali
+                    if (oreGiornata === 7) {
+                        orario = "09:00-13:00 / 14:00-17:00";
+                    } else {
+                        const [oreInizio, minutiInizio] = parametri.orarioInizio.split(':').map(Number);
+                        const minutiTotaliInizio = oreInizio * 60 + minutiInizio;
+                        const minutiTotaliFine = minutiTotaliInizio + (oreGiornata * 60);
+                        const oreFine = Math.floor(minutiTotaliFine / 60);
+                        const minutiFine = minutiTotaliFine % 60;
+                        const orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minutiFine).padStart(2, '0')}`;
+                        orario = `${parametri.orarioInizio} - ${orarioFine}`;
+                    }
+                }
+
+                return { orario, ore: oreGiornata };
+            };
+
             const generaCalendari = (numCorsi, giorniNecessari) => {
                 const calendariGenerati = [];
                 const arrayOreGiornate = getArrayOreGiornate();
@@ -987,32 +1056,18 @@
                             
                             if (parametri.giorni.includes(dayNum) && !isDataEsclusa(dataLezione)) {
                                 const prog = programma[giorniContati];
-                                const oreGiornata = arrayOreGiornate[giorniContati] || parametri.oreGiorno;
-                                
-                                // 🕐 GESTIONE ORARI con pausa pranzo per giornate da 7h
-                                let orario;
-                                if (oreGiornata === 7) {
-                                    // 7h = 4h mattina + 1h pausa + 3h pomeriggio
-                                    // 9:00-13:00 (4h) → PAUSA → 14:00-17:00 (3h)
-                                    orario = "09:00-13:00 / 14:00-17:00";
-                                } else {
-                                    // Calcola orario fine basato su ore giornata (continuo, senza pausa)
-                                    const [oreInizio, minutiInizio] = parametri.orarioInizio.split(':').map(Number);
-                                    const minutiTotaliInizio = oreInizio * 60 + minutiInizio;
-                                    const minutiTotaliFine = minutiTotaliInizio + (oreGiornata * 60);
-                                    const oreFine = Math.floor(minutiTotaliFine / 60);
-                                    const minutiFine = minutiTotaliFine % 60;
-                                    const orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minutiFine).padStart(2, '0')}`;
-                                    orario = `${parametri.orarioInizio} - ${orarioFine}`;
-                                }
-                                
+
+                                // Usa la nuova funzione per calcolare orari e ore in base ai parametri del modulo
+                                const { orario, ore } = calcolaOrariLezione(prog, arrayOreGiornate, giorniContati);
+
                                 lezioni.push({
                                     data: new Date(dataLezione),
                                     giorno: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][dataLezione.getDay()],
                                     orario: orario,
-                                    ore: oreGiornata,
+                                    ore: ore,
                                     modulo: prog.modulo,
                                     argomenti: prog.argomenti,
+                                    tipoLezione: prog.tipoLezione || 'default'
                                 });
                                 giorniContati++;
                             }
@@ -2038,27 +2093,98 @@
 
                                 <div className="programma-container">
                                     {programma.map((lezione, index) => (
-                                        <div key={index} className="lezione-item">
-                                            <div className="lezione-giorno">Giorno {lezione.giorno}</div>
-                                            <input
-                                                type="text"
-                                                value={lezione.modulo}
-                                                onChange={(e) => aggiornaLezione(index, 'modulo', e.target.value)}
-                                                className="form-input lezione-modulo"
-                                                placeholder="Modulo"
-                                            />
+                                        <div key={index} style={{marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem', border: '2px solid #e5e7eb'}}>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem'}}>
+                                                <div style={{fontWeight: 'bold', fontSize: '1rem', minWidth: '80px'}}>Giorno {lezione.giorno}</div>
+                                                <input
+                                                    type="text"
+                                                    value={lezione.modulo}
+                                                    onChange={(e) => aggiornaLezione(index, 'modulo', e.target.value)}
+                                                    className="form-input"
+                                                    placeholder="Modulo"
+                                                    style={{flex: 1}}
+                                                />
+                                                <button onClick={() => rimuoviLezione(index)} className="btn btn-remove">
+                                                    <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                             <input
                                                 type="text"
                                                 value={lezione.argomenti}
                                                 onChange={(e) => aggiornaLezione(index, 'argomenti', e.target.value)}
-                                                className="form-input lezione-argomenti"
+                                                className="form-input"
                                                 placeholder="Argomenti della lezione"
+                                                style={{marginBottom: '0.75rem'}}
                                             />
-                                            <button onClick={() => rimuoviLezione(index)} className="btn btn-remove">
-                                                <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+                                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem'}}>
+                                                <div>
+                                                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Tipo Lezione</label>
+                                                    <select
+                                                        value={lezione.tipoLezione || 'default'}
+                                                        onChange={(e) => aggiornaLezione(index, 'tipoLezione', e.target.value)}
+                                                        className="form-select"
+                                                        style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db'}}
+                                                    >
+                                                        <option value="default">Usa default</option>
+                                                        <option value="online">🌐 Online</option>
+                                                        <option value="presenza">🏫 In Presenza</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Ore Giornata</label>
+                                                    <input
+                                                        type="number"
+                                                        min="3"
+                                                        max="7"
+                                                        step="0.5"
+                                                        value={lezione.oreGiornata || ''}
+                                                        onChange={(e) => aggiornaLezione(index, 'oreGiornata', e.target.value ? parseFloat(e.target.value) : null)}
+                                                        className="form-input"
+                                                        placeholder="Default"
+                                                        style={{width: '100%'}}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Fascia Oraria</label>
+                                                    <select
+                                                        value={lezione.fasciaOraria || 'default'}
+                                                        onChange={(e) => aggiornaLezione(index, 'fasciaOraria', e.target.value)}
+                                                        className="form-select"
+                                                        style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db'}}
+                                                    >
+                                                        <option value="default">Usa default</option>
+                                                        <option value="mattina">☀️ Mattina</option>
+                                                        <option value="pomeriggio">🌙 Pomeriggio</option>
+                                                        <option value="personalizzato">⚙️ Personalizzato</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            {lezione.fasciaOraria === 'personalizzato' && (
+                                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.75rem'}}>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Orario Inizio</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.orarioInizio || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'orarioInizio', e.target.value)}
+                                                            className="form-input"
+                                                            style={{width: '100%'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.25rem'}}>Orario Fine</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.orarioFine || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'orarioFine', e.target.value)}
+                                                            className="form-input"
+                                                            style={{width: '100%'}}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
