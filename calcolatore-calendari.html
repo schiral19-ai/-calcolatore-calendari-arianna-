@@ -538,7 +538,7 @@
             .lezione-item {
                 flex-direction: column;
             }
-            
+
             .lezione-giorno,
             .lezione-modulo,
             .lezione-argomenti {
@@ -549,10 +549,27 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .footer {
+            background: linear-gradient(to right, #111827, #1f2937);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .footer-text {
+            color: #d1d5db;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
+
+    <div class="footer">
+        <p class="footer-text">Sviluppato da Roberto Schiraldi</p>
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
