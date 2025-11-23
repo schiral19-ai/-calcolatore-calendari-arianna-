@@ -1,0 +1,2685 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore Calendari Corsi 2026 - SONODIGITALE</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .header {
+            background: linear-gradient(to right, #196C28, #1a7a2e);
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header p {
+            color: #d1d5db;
+            margin-top: 0.5rem;
+        }
+
+        .header-logo {
+            height: 150px;
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-logo {
+                height: 120px;
+            }
+        }
+
+        .section {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-cols-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .template-card {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .template-card:hover {
+            border-color: #fdba74;
+        }
+
+        .template-card.active {
+            border-color: #FC7E15;
+            background-color: #fff7ed;
+        }
+
+        .template-card .title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .template-card .subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #FC7E15;
+            box-shadow: 0 0 0 3px rgba(252, 126, 21, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: #FC7E15;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-add {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-remove {
+            background-color: #dc2626;
+            color: white;
+            padding: 0.5rem;
+        }
+
+        .lezione-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: #f9fafb;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .lezione-giorno {
+            width: 80px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            padding-top: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .lezione-modulo {
+            width: 160px;
+            flex-shrink: 0;
+        }
+
+        .lezione-argomenti {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .programma-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .programma-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .programma-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .programma-container::-webkit-scrollbar-thumb {
+            background: #FC7E15;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .stat-card.gray {
+            background-color: #f9fafb;
+        }
+
+        .stat-card.orange {
+            background-color: #FC7E15;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card.gray .stat-label {
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .calendario-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .calendario-card:hover {
+            border-color: #fdba74;
+        }
+
+        .calendario-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .calendario-date {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            padding: 0.5rem;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .text-muted {
+            color: #6b7280;
+            text-align: center;
+            padding: 1rem;
+            background-color: #f9fafb;
+        }
+
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #FC7E15;
+        }
+
+        .icon-lg {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #FC7E15;
+            margin-bottom: 1rem;
+        }
+
+        .info-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .alert-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .esclusione-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: #fef2f2;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #dc2626;
+        }
+
+        .esclusione-text {
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .esclusione-date {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .festivity-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background-color: #fef3c7;
+            color: #92400e;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .festivity-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-expand {
+            background-color: #f3f4f6;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-expand:hover {
+            background-color: #e5e7eb;
+        }
+
+        .exclusion-form {
+            display: grid;
+            grid-template-columns: auto auto auto 1fr;
+            gap: 0.5rem;
+            align-items: end;
+            margin-bottom: 1rem;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .distribuzione-section {
+            background-color: #fff7ed;
+            border: 2px solid #FC7E15;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .distribuzione-title {
+            font-weight: bold;
+            color: #FC7E15;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .opzione-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opzione-card:hover {
+            border-color: #FC7E15;
+        }
+
+        .opzione-card.selected {
+            border-color: #FC7E15;
+            background-color: #fff7ed;
+        }
+
+        .opzione-descrizione {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .opzione-dettaglio {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .personalizzata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .ore-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .ore-input-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .ore-input {
+            text-align: center;
+        }
+
+        .ore-calcolo {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .totale-ore {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .totale-ore.valido {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .totale-ore.non-valido {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .lezione-item {
+                flex-direction: column;
+            }
+
+            .lezione-giorno,
+            .lezione-modulo,
+            .lezione-argomenti {
+                width: 100%;
+            }
+
+            .exclusion-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            background: linear-gradient(to right, #196C28, #1a7a2e);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .footer-text {
+            color: #d1d5db;
+        }
+
+        /* Pulsante Guida */
+        .btn-guida {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #196C28;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-guida:hover {
+            background-color: #1a7a2e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 800px;
+            max-height: 90vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            background: linear-gradient(to right, #196C28, #1a7a2e);
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .guida-section {
+            margin-bottom: 2rem;
+        }
+
+        .guida-section h3 {
+            color: #196C28;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .guida-section p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .guida-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .guida-section ul li {
+            color: #4b5563;
+            line-height: 1.8;
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .guida-section ul li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #196C28;
+            font-weight: bold;
+        }
+
+        .guida-section em {
+            background-color: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-style: normal;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                max-height: 95vh;
+                margin: 0.5rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .guida-section h3 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <div class="footer">
+        <p class="footer-text">Sviluppato da Roberto Schiraldi</p>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const CalendarioCorsiApp = () => {
+            const [templateSelezionato, setTemplateSelezionato] = useState('');
+            const [parametri, setParametri] = useState({
+                nomeCorso: '',
+                oreTotali: 100,
+                oreGiorno: 5,
+                orarioInizio: '09:00',
+                orarioFine: '14:00',
+                giorni: [1, 2, 3, 4, 5],
+                numeroDocenti: 2,
+                dataInizio: '',
+                dataFine: '',
+                tipoDefault: 'presenza',
+            });
+            
+            const [programma, setProgramma] = useState([]);
+            const [risultati, setRisultati] = useState(null);
+            const [calendari, setCalendari] = useState([]);
+            const [esclusioni, setEsclusioni] = useState([]);
+            const [calendariEspansi, setCalendariEspansi] = useState([]);
+            const [nomiDocenti, setNomiDocenti] = useState([]);
+            const [modificheOrari, setModificheOrari] = useState({});
+            const [distribuzioneOre, setDistribuzioneOre] = useState({
+                modalita: 'automatica', // 'automatica' o 'personalizzata'
+                opzioneScelta: null, // indice opzione automatica scelta
+                personalizzata: {
+                    ore7: 0,
+                    ore6: 0,
+                    ore5: 0,
+                    ore4: 0,
+                    ore3: 0
+                }
+            });
+            const [tipoEsclusione, setTipoEsclusione] = useState('singola'); // 'singola' o 'periodo'
+            const [dataEsclusione, setDataEsclusione] = useState('');
+            const [dataInizioPeriodo, setDataInizioPeriodo] = useState('');
+            const [dataFinePeriodo, setDataFinePeriodo] = useState('');
+            const [motivoEsclusione, setMotivoEsclusione] = useState('');
+            const [mostraGuida, setMostraGuida] = useState(false);
+
+            // Festività italiane 2026
+            const festivitaItaliane2026 = [
+                { data: '2026-01-01', nome: 'Capodanno' },
+                { data: '2026-01-06', nome: 'Epifania' },
+                { data: '2026-04-05', nome: 'Pasqua' },
+                { data: '2026-04-06', nome: 'Lunedì dell\'Angelo' },
+                { data: '2026-04-25', nome: 'Festa della Liberazione' },
+                { data: '2026-05-01', nome: 'Festa dei Lavoratori' },
+                { data: '2026-06-02', nome: 'Festa della Repubblica' },
+                { data: '2026-08-15', nome: 'Ferragosto' },
+                { data: '2026-11-01', nome: 'Ognissanti' },
+                { data: '2026-12-08', nome: 'Immacolata Concezione' },
+                { data: '2026-12-25', nome: 'Natale' },
+                { data: '2026-12-26', nome: 'Santo Stefano' },
+            ];
+
+            const templates = {
+                ai100: {
+                    nome: 'AI Start - 100 ore',
+                    oreTotali: 100,
+                    oreGiorno: 5,
+                    orarioInizio: '09:00',
+                    orarioFine: '14:00',
+                    tipoDefault: 'online',
+                    programma: [
+                        { giorno: 1, modulo: 'Modulo 1', argomenti: "Cos'è l'IA (storia, definizioni, ambiti). Tipologie di AI (Narrow, General, Generative)." },
+                        { giorno: 2, modulo: 'Modulo 1', argomenti: 'Prompt Engineering (principi base). Panoramica strumenti AI (ChatGPT, Gemini, Copilot).' },
+                        { giorno: 3, modulo: 'Modulo 1', argomenti: 'Aggiornamenti Google (Gemini, NotebookLM). Dashboard e personalizzazione account.' },
+                        { giorno: 4, modulo: 'Modulo 1', argomenti: 'Deep Research e nuovi motori (Perplexity). Esercitazioni pratiche di base.' },
+                        { giorno: 5, modulo: 'Modulo 1', argomenti: 'AI per produttività personale: gestione tempo, to-do list, organizzazione attività.' },
+                        { giorno: 6, modulo: 'Moduli 1 e 2', argomenti: 'AI per produttività (continuazione). Creazione CV con AI. Lettere di presentazione.' },
+                        { giorno: 7, modulo: 'Modulo 2', argomenti: 'Preparazione colloqui (simulazioni). Strumenti AI per grafica (Canva AI).' },
+                        { giorno: 8, modulo: 'Modulo 2', argomenti: 'Contenuti per LinkedIn. Piano base di personal branding. AI nel marketing digitale.' },
+                        { giorno: 9, modulo: 'Modulo 2', argomenti: 'Piano editoriale con AI. Generazione contenuti: post e reel per social media.' },
+                        { giorno: 10, modulo: 'Modulo 2', argomenti: 'Generazione testi persuasivi. Copywriting con AI per marketing.' },
+                        { giorno: 11, modulo: 'Modulo 3', argomenti: 'AI per immagini e video: modelli principali. Canva Magic Design.' },
+                        { giorno: 12, modulo: 'Modulo 3', argomenti: 'Esercitazioni pratiche: piani editoriali per Instagram e LinkedIn.' },
+                        { giorno: 13, modulo: 'Modulo 3', argomenti: 'Automazioni semplificate: concetti base, vantaggi ed esempi pratici.' },
+                        { giorno: 14, modulo: 'Modulo 3', argomenti: 'CRM introduttivo con Excel e Google Sheets. Gestione contatti con AI.' },
+                        { giorno: 15, modulo: 'Modulo 3', argomenti: 'Ricerca avanzata con AI su web e LinkedIn. Esercitazioni finali Modulo 3.' },
+                        { giorno: 16, modulo: 'Modulo 4', argomenti: 'Avvio project work individuale o di gruppo. Pianificazione attività.' },
+                        { giorno: 17, modulo: 'Modulo 4', argomenti: 'Project work: sviluppo e supporto individuale.' },
+                        { giorno: 18, modulo: 'Modulo 4', argomenti: 'Presentazione project work (parte 1). Feedback e correzioni.' },
+                        { giorno: 19, modulo: 'Modulo 4', argomenti: 'Presentazione project work (parte 2). Personal Branding avanzato su LinkedIn.' },
+                        { giorno: 20, modulo: 'Modulo 4', argomenti: 'Come presentare competenze in CV e colloqui. Q&A finale e completamento ore.' },
+                    ]
+                },
+                social50: {
+                    nome: 'Social Media Manager con AI - 50 ore',
+                    oreTotali: 50,
+                    oreGiorno: 4,
+                    orarioInizio: '09:00',
+                    orarioFine: '13:00',
+                    tipoDefault: 'online',
+                    programma: [
+                        { giorno: 1, modulo: 'Settimana 1', argomenti: 'Introduzione Marketing e Logiche Digitali' },
+                        { giorno: 2, modulo: 'Settimana 1', argomenti: 'Brand, Personal Brand e LinkedIn' },
+                        { giorno: 3, modulo: 'Settimana 1', argomenti: 'AI Generativa per Social Media - Parte 1' },
+                        { giorno: 4, modulo: 'Settimana 1', argomenti: 'AI per Immagini e Panoramica Ecosistema Social' },
+                        { giorno: 5, modulo: 'Settimana 2', argomenti: 'Content Creation Visual con Canva' },
+                        { giorno: 6, modulo: 'Settimana 2', argomenti: 'Video Editing Base e Reel con Canva' },
+                        { giorno: 7, modulo: 'Settimana 2', argomenti: 'Copywriting e Caption con AI' },
+                        { giorno: 8, modulo: 'Settimana 2', argomenti: 'Instagram Marketing Operativo' },
+                        { giorno: 9, modulo: 'Settimana 2', argomenti: 'LinkedIn Marketing e B2B' },
+                        { giorno: 10, modulo: 'Settimana 3', argomenti: 'Strategia Editoriale e Planning' },
+                        { giorno: 11, modulo: 'Settimana 3', argomenti: 'Analytics e Ottimizzazione' },
+                        { giorno: 12, modulo: 'Settimana 3', argomenti: 'Facebook, TikTok, YouTube (Panoramica)' },
+                        { giorno: 13, modulo: 'Settimana 3', argomenti: 'Project Work Finale e Portfolio' },
+                    ]
+                }
+            };
+
+            const caricaTemplate = (key) => {
+                const template = templates[key];
+                setTemplateSelezionato(key);
+                setParametri({
+                    ...parametri,
+                    nomeCorso: template.nome,
+                    oreTotali: template.oreTotali,
+                    oreGiorno: template.oreGiorno,
+                    orarioInizio: template.orarioInizio,
+                    orarioFine: template.orarioFine,
+                    tipoDefault: template.tipoDefault || 'presenza',
+                });
+                setProgramma([...template.programma]);
+            };
+
+            // 🎯 NUOVA LOGICA: Genera automaticamente le lezioni quando la distribuzione è definita
+            useEffect(() => {
+                // Solo per corso personalizzato
+                if (templateSelezionato !== 'custom') return;
+                
+                // Solo se ci sono ore totali e ore giorno valide
+                if (parametri.oreTotali === 0 || parametri.oreGiorno === 0) return;
+
+                // ⚠️ VINCOLO: Ore giorno deve essere tra 3 e 7
+                if (parametri.oreGiorno < 3 || parametri.oreGiorno > 7) {
+                    setProgramma([]);
+                    return;
+                }
+
+                const opzioni = calcolaOpzioniDistribuzione();
+                
+                // CASO 1: Distribuzione perfetta (nessun resto)
+                if (opzioni.length === 0) {
+                    const numGiorni = Math.floor(parametri.oreTotali / parametri.oreGiorno);
+                    generaLezioniVuote(numGiorni);
+                    return;
+                }
+
+                // CASO 2: C'è resto, ma nessuna distribuzione scelta ancora
+                if (distribuzioneOre.modalita === 'automatica' && distribuzioneOre.opzioneScelta === null) {
+                    // Non generare ancora le lezioni
+                    setProgramma([]);
+                    return;
+                }
+
+                // CASO 3: Distribuzione automatica scelta
+                if (distribuzioneOre.modalita === 'automatica' && distribuzioneOre.opzioneScelta !== null) {
+                    const arrayOre = getArrayOreGiornate();
+                    // Verifica che tutte le ore rispettino i vincoli
+                    const oreNonValide = arrayOre.find(ore => ore < 3 || ore > 7);
+                    if (oreNonValide) {
+                        setProgramma([]);
+                        return;
+                    }
+                    generaLezioniVuote(arrayOre.length);
+                    return;
+                }
+
+                // CASO 4: Distribuzione personalizzata
+                if (distribuzioneOre.modalita === 'personalizzata') {
+                    const totalePersonalizzato = getOrePersonalizzateTotali();
+                    // Genera lezioni solo se la distribuzione è valida
+                    if (totalePersonalizzato === parametri.oreTotali && isDistribuzionePersonalizzataValida()) {
+                        const arrayOre = getArrayOreGiornate();
+                        // Verifica che tutte le ore rispettino i vincoli
+                        const oreNonValide = arrayOre.find(ore => ore < 3 || ore > 7);
+                        if (oreNonValide) {
+                            setProgramma([]);
+                            return;
+                        }
+                        generaLezioniVuote(arrayOre.length);
+                    } else {
+                        // Distribuzione non valida, non generare lezioni
+                        setProgramma([]);
+                    }
+                }
+            }, [templateSelezionato, parametri.oreTotali, parametri.oreGiorno, distribuzioneOre]);
+
+            const generaLezioniVuote = (numLezioni) => {
+                // Non rigenerare se il numero è lo stesso
+                if (programma.length === numLezioni) return;
+
+                const arrayOreGiornate = getArrayOreGiornate();
+                const nuoveProgramma = [];
+                for (let i = 0; i < numLezioni; i++) {
+                    const oreGiorno = arrayOreGiornate[i] || parametri.oreGiorno;
+
+                    let orarioInizio = parametri.orarioInizio;
+                    let orarioFine;
+                    let pausaInizio = '';
+                    let pausaFine = '';
+
+                    // Per lezioni da 7 ore, preimposta 09:00-17:00 con pausa 13:00-14:00
+                    if (oreGiorno === 7) {
+                        orarioInizio = '09:00';
+                        orarioFine = '17:00';
+                        pausaInizio = '13:00';
+                        pausaFine = '14:00';
+                    } else {
+                        // Calcola orario fine per altre durate
+                        const [oreInizio, minInizio] = parametri.orarioInizio.split(':').map(Number);
+                        const minutiInizio = oreInizio * 60 + minInizio;
+                        const minutiFine = minutiInizio + (oreGiorno * 60);
+                        const oreFine = Math.floor(minutiFine / 60);
+                        const minFine = minutiFine % 60;
+                        orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minFine).padStart(2, '0')}`;
+                    }
+
+                    nuoveProgramma.push({
+                        giorno: i + 1,
+                        modulo: '',
+                        argomenti: '',
+                        tipoLezione: parametri.tipoDefault || 'presenza',
+                        oreGiornata: oreGiorno,
+                        fasciaOraria: 'default',
+                        orarioInizio: orarioInizio,
+                        orarioFine: orarioFine,
+                        pausaInizio: pausaInizio,
+                        pausaFine: pausaFine
+                    });
+                }
+                setProgramma(nuoveProgramma);
+            };
+
+            const aggiungiLezione = () => {
+                setProgramma([...programma, {
+                    giorno: programma.length + 1,
+                    modulo: '',
+                    argomenti: '',
+                    tipoLezione: parametri.tipoDefault || 'presenza',
+                    oreGiornata: null,
+                    fasciaOraria: 'default',
+                    orarioInizio: '',
+                    orarioFine: '',
+                    pausaInizio: '',
+                    pausaFine: ''
+                }]);
+            };
+
+            const rimuoviLezione = (index) => {
+                const nuovoProgramma = programma.filter((_, i) => i !== index);
+                nuovoProgramma.forEach((item, i) => item.giorno = i + 1);
+                setProgramma(nuovoProgramma);
+            };
+
+            // Funzione per calcolare ore da orari e pausa
+            const calcolaOreGiornata = (orarioInizio, orarioFine, pausaInizio, pausaFine) => {
+                if (!orarioInizio || !orarioFine) return null;
+
+                const [oreI, minI] = orarioInizio.split(':').map(Number);
+                const [oreF, minF] = orarioFine.split(':').map(Number);
+                let minutiTotali = (oreF * 60 + minF) - (oreI * 60 + minI);
+
+                // Sottrai pausa se presente
+                if (pausaInizio && pausaFine) {
+                    const [orePI, minPI] = pausaInizio.split(':').map(Number);
+                    const [orePF, minPF] = pausaFine.split(':').map(Number);
+                    const minutiPausa = (orePF * 60 + minPF) - (orePI * 60 + minPI);
+                    minutiTotali -= minutiPausa;
+                }
+
+                return (minutiTotali / 60).toFixed(1);
+            };
+
+            const aggiornaLezione = (index, campo, valore) => {
+                const nuovoProgramma = [...programma];
+                nuovoProgramma[index][campo] = valore;
+
+                // Ricalcola ore giornata quando cambiano orari o pausa
+                if (['orarioInizio', 'orarioFine', 'pausaInizio', 'pausaFine'].includes(campo)) {
+                    const lezione = nuovoProgramma[index];
+                    const ore = calcolaOreGiornata(
+                        lezione.orarioInizio,
+                        lezione.orarioFine,
+                        lezione.pausaInizio,
+                        lezione.pausaFine
+                    );
+                    if (ore !== null) {
+                        nuovoProgramma[index].oreGiornata = parseFloat(ore);
+                    }
+                }
+
+                setProgramma(nuovoProgramma);
+            };
+
+            // Funzione per calcolare il totale ore del programma
+            const calcolaTotaleOreProgramma = () => {
+                return programma.reduce((totale, lezione) => {
+                    return totale + (lezione.oreGiornata || 0);
+                }, 0);
+            };
+
+            const aggiungiEsclusione = () => {
+                if (tipoEsclusione === 'singola') {
+                    if (!dataEsclusione) {
+                        alert('Inserisci una data');
+                        return;
+                    }
+                    setEsclusioni([...esclusioni, {
+                        tipo: 'singola',
+                        data: dataEsclusione,
+                        motivo: motivoEsclusione || 'Chiusura',
+                        id: Date.now()
+                    }]);
+                    setDataEsclusione('');
+                } else {
+                    if (!dataInizioPeriodo || !dataFinePeriodo) {
+                        alert('Inserisci entrambe le date del periodo');
+                        return;
+                    }
+                    if (new Date(dataInizioPeriodo) > new Date(dataFinePeriodo)) {
+                        alert('La data di inizio deve essere precedente alla data di fine');
+                        return;
+                    }
+                    setEsclusioni([...esclusioni, {
+                        tipo: 'periodo',
+                        dataInizio: dataInizioPeriodo,
+                        dataFine: dataFinePeriodo,
+                        motivo: motivoEsclusione || 'Chiusura',
+                        id: Date.now()
+                    }]);
+                    setDataInizioPeriodo('');
+                    setDataFinePeriodo('');
+                }
+                setMotivoEsclusione('');
+            };
+
+            const rimuoviEsclusione = (id) => {
+                setEsclusioni(esclusioni.filter(e => e.id !== id));
+            };
+
+            const isDataEsclusa = (data) => {
+                const dataStr = data.toISOString().split('T')[0];
+                
+                // Controlla festività
+                if (festivitaItaliane2026.some(f => f.data === dataStr)) {
+                    return true;
+                }
+                
+                // Controlla esclusioni personalizzate
+                for (const escl of esclusioni) {
+                    if (escl.tipo === 'singola' && escl.data === dataStr) {
+                        return true;
+                    }
+                    if (escl.tipo === 'periodo') {
+                        const dataCheck = new Date(dataStr);
+                        const inizio = new Date(escl.dataInizio);
+                        const fine = new Date(escl.dataFine);
+                        if (dataCheck >= inizio && dataCheck <= fine) {
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            };
+
+            const calcolaGiorniLavorativi = (dataInizio, dataFine, giorni) => {
+                let count = 0;
+                let current = new Date(dataInizio);
+                const fine = new Date(dataFine);
+                
+                while (current <= fine) {
+                    const dayOfWeek = current.getDay();
+                    const dayNum = dayOfWeek === 0 ? 7 : dayOfWeek;
+                    
+                    if (giorni.includes(dayNum) && !isDataEsclusa(current)) {
+                        count++;
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+                return count;
+            };
+
+            const getFestivitaNelPeriodo = () => {
+                if (!parametri.dataInizio || !parametri.dataFine) return [];
+                
+                const inizio = new Date(parametri.dataInizio);
+                const fine = new Date(parametri.dataFine);
+                
+                return festivitaItaliane2026.filter(f => {
+                    const dataFest = new Date(f.data);
+                    return dataFest >= inizio && dataFest <= fine;
+                });
+            };
+
+            const calcolaCorsi = () => {
+                if (!parametri.dataInizio || !parametri.dataFine) {
+                    alert('Inserisci le date di inizio e fine periodo');
+                    return;
+                }
+
+                if (programma.length === 0) {
+                    alert('Aggiungi almeno una lezione al programma');
+                    return;
+                }
+
+                // Validazione ore giorno
+                if (parametri.oreGiorno < 3 || parametri.oreGiorno > 7) {
+                    alert('⚠️ VINCOLO: Le lezioni devono essere tra 3h e 7h. Correggi "Ore al Giorno".');
+                    return;
+                }
+
+                // Validazione distribuzione ore personalizzata
+                const opzioni = calcolaOpzioniDistribuzione();
+                if (opzioni.length > 0 && distribuzioneOre.modalita === 'personalizzata') {
+                    const totalePersonalizzato = getOrePersonalizzateTotali();
+                    if (totalePersonalizzato !== parametri.oreTotali) {
+                        alert(`Attenzione: la distribuzione personalizzata ha ${totalePersonalizzato} ore, ma il corso richiede ${parametri.oreTotali} ore. Correggi la distribuzione.`);
+                        return;
+                    }
+                    
+                    // Verifica che non ci siano giorni con ore fuori vincoli (già garantito da interfaccia)
+                    if (!isDistribuzionePersonalizzataValida()) {
+                        alert('⚠️ VINCOLO: Tutte le lezioni devono essere tra 3h e 7h.');
+                        return;
+                    }
+                }
+
+                // Validazione che l'array ore rispetti i vincoli
+                const arrayOre = getArrayOreGiornate();
+                const oreNonValide = arrayOre.find(ore => ore < 3 || ore > 7);
+                if (oreNonValide) {
+                    alert(`⚠️ VINCOLO: Trovata lezione da ${oreNonValide}h. Tutte le lezioni devono essere tra 3h e 7h. Controlla la distribuzione.`);
+                    return;
+                }
+
+                const giorniNecessari = arrayOre.length;
+                const giorniDisponibili = calcolaGiorniLavorativi(parametri.dataInizio, parametri.dataFine, parametri.giorni);
+                const corsiPerDocente = Math.floor(giorniDisponibili / giorniNecessari);
+                const corsiTotali = corsiPerDocente * parametri.numeroDocenti;
+
+                setRisultati({
+                    giorniNecessari,
+                    giorniDisponibili,
+                    corsiPerDocente,
+                    corsiTotali,
+                    festivita: getFestivitaNelPeriodo().length,
+                    esclusioni: esclusioni.length
+                });
+
+                generaCalendari(corsiTotali, giorniNecessari);
+            };
+
+            // Funzione per calcolare orari e ore in base ai parametri del modulo
+            const calcolaOrariLezione = (prog, arrayOreGiornate, giorniContati) => {
+                // Usa ore giornata dal programma (già calcolate automaticamente)
+                const oreGiornata = prog.oreGiornata || arrayOreGiornate[giorniContati] || parametri.oreGiorno;
+
+                // Determina orari
+                let orario;
+
+                // Se il programma ha orari impostati, usali
+                if (prog.orarioInizio && prog.orarioFine) {
+                    // Se c'è una pausa, genera orario con pausa
+                    if (prog.pausaInizio && prog.pausaFine) {
+                        orario = `${prog.orarioInizio}-${prog.pausaInizio} / ${prog.pausaFine}-${prog.orarioFine}`;
+                    } else {
+                        // Orario continuo
+                        orario = `${prog.orarioInizio} - ${prog.orarioFine}`;
+                    }
+                } else {
+                    // Default: calcola da parametri globali
+                    if (oreGiornata === 7) {
+                        orario = "09:00-13:00 / 14:00-17:00";
+                    } else {
+                        const [oreInizio, minutiInizio] = parametri.orarioInizio.split(':').map(Number);
+                        const minutiTotaliInizio = oreInizio * 60 + minutiInizio;
+                        const minutiTotaliFine = minutiTotaliInizio + (oreGiornata * 60);
+                        const oreFine = Math.floor(minutiTotaliFine / 60);
+                        const minutiFine = minutiTotaliFine % 60;
+                        const orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minutiFine).padStart(2, '0')}`;
+                        orario = `${parametri.orarioInizio} - ${orarioFine}`;
+                    }
+                }
+
+                return { orario, ore: oreGiornata };
+            };
+
+            const generaCalendari = (numCorsi, giorniNecessari) => {
+                const calendariGenerati = [];
+                const arrayOreGiornate = getArrayOreGiornate();
+                
+                for (let docente = 1; docente <= parametri.numeroDocenti; docente++) {
+                    let dataDocenteInizio = new Date(parametri.dataInizio);
+                    
+                    for (let corso = 1; corso <= Math.floor(numCorsi / parametri.numeroDocenti); corso++) {
+                        const lezioni = [];
+                        let dataLezione = new Date(dataDocenteInizio);
+                        let giorniContati = 0;
+
+                        while (giorniContati < giorniNecessari && giorniContati < programma.length) {
+                            const dayOfWeek = dataLezione.getDay();
+                            const dayNum = dayOfWeek === 0 ? 7 : dayOfWeek;
+                            
+                            if (parametri.giorni.includes(dayNum) && !isDataEsclusa(dataLezione)) {
+                                const prog = programma[giorniContati];
+
+                                // Usa la nuova funzione per calcolare orari e ore in base ai parametri del modulo
+                                const { orario, ore } = calcolaOrariLezione(prog, arrayOreGiornate, giorniContati);
+
+                                lezioni.push({
+                                    data: new Date(dataLezione),
+                                    giorno: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][dataLezione.getDay()],
+                                    orario: orario,
+                                    ore: ore,
+                                    modulo: prog.modulo,
+                                    argomenti: prog.argomenti,
+                                    tipoLezione: prog.tipoLezione || 'default'
+                                });
+                                giorniContati++;
+                            }
+                            dataLezione.setDate(dataLezione.getDate() + 1);
+                        }
+
+                        if (lezioni.length === giorniNecessari) {
+                            calendariGenerati.push({
+                                nome: `CORSO ${corso}${String.fromCharCode(64 + docente)} - ${getNomeDocente(docente)}`,
+                                dataInizio: new Date(lezioni[0].data),
+                                dataFine: new Date(lezioni[lezioni.length - 1].data),
+                                lezioni,
+                            });
+                        }
+
+                        dataDocenteInizio = new Date(dataLezione);
+                    }
+                }
+
+                setCalendari(calendariGenerati);
+            };
+
+            const esportaExcel = async () => {
+                const workbook = new ExcelJS.Workbook();
+                
+                calendari.forEach((calendario, idx) => {
+                    const worksheet = workbook.addWorksheet(calendario.nome.substring(0, 31));
+                    
+                    // Titolo (riga 1)
+                    worksheet.mergeCells('A1:G1');
+                    const titleCell = worksheet.getCell('A1');
+                    titleCell.value = calendario.nome;
+                    titleCell.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+                    titleCell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFFC7E15' }
+                    };
+                    titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+                    worksheet.getRow(1).height = 25;
+
+                    // Sottotitolo (riga 2)
+                    worksheet.mergeCells('A2:G2');
+                    const subtitleCell = worksheet.getCell('A2');
+                    subtitleCell.value = `Periodo: ${calendario.dataInizio.toLocaleDateString('it-IT')} - ${parametri.nomeCorso} (${parametri.oreTotali} Ore)`;
+                    subtitleCell.font = { size: 11, color: { argb: 'FF374151' } };
+                    subtitleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+                    worksheet.getRow(2).height = 20;
+                    
+                    // Riga vuota (riga 3)
+                    worksheet.getRow(3).height = 10;
+                    
+                    // Header (riga 4)
+                    const headerRow = worksheet.getRow(4);
+                    const headers = ['Data', 'Giorno', 'Orario', 'Ore', 'Tipo', 'Modulo', 'Argomenti'];
+                    headers.forEach((header, colIdx) => {
+                        const cell = headerRow.getCell(colIdx + 1);
+                        cell.value = header;
+                        cell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFFC7E15' }
+                        };
+                        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FF000000' } },
+                            bottom: { style: 'thin', color: { argb: 'FF000000' } },
+                            left: { style: 'thin', color: { argb: 'FF000000' } },
+                            right: { style: 'thin', color: { argb: 'FF000000' } }
+                        };
+                    });
+                    headerRow.height = 25;
+                    
+                    // Righe dati (a partire da riga 5)
+                    calendario.lezioni.forEach((lezione, lezioneIdx) => {
+                        const rowNum = lezioneIdx + 5;
+                        const row = worksheet.getRow(rowNum);
+                        const isEven = lezioneIdx % 2 === 0;
+                        const bgColor = isEven ? 'FFFFFFFF' : 'FFF9FAFB';
+
+                        // Ottieni orari modificati o originali
+                        const orari = getOrarioLezione(idx, lezioneIdx, lezione);
+                        // Usa l'orario originale che include la pausa formattata correttamente
+                        const orarioCompleto = lezione.orario;
+
+                        const rowData = [
+                            lezione.data.toLocaleDateString('it-IT'),
+                            lezione.giorno,
+                            orarioCompleto,
+                            orari.ore,
+                            lezione.tipoLezione === 'online' ? 'Online' : 'Presenza',
+                            lezione.modulo,
+                            lezione.argomenti
+                        ];
+                        
+                        rowData.forEach((value, colIdx) => {
+                            const cell = row.getCell(colIdx + 1);
+                            cell.value = value;
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: bgColor }
+                            };
+                            cell.alignment = {
+                                vertical: 'top',
+                                horizontal: (colIdx === 3 || colIdx === 4) ? 'center' : 'left',
+                                wrapText: colIdx === 6
+                            };
+                            cell.border = {
+                                top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                                bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                                left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+                                right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+                            };
+                        });
+                        
+                        row.height = 30;
+                    });
+                    
+                    // Riga TOTALE (ultima riga)
+                    const totaleRowNum = calendario.lezioni.length + 5;
+                    const totaleRow = worksheet.getRow(totaleRowNum);
+                    const totaleOreCalendario = calcolaTotaleOreCalendario(idx);
+
+                    ['', '', 'TOTALE ORE:', totaleOreCalendario, '', ''].forEach((value, colIdx) => {
+                        const cell = totaleRow.getCell(colIdx + 1);
+                        cell.value = value;
+                        cell.font = { bold: true, size: 11 };
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFF3F4F6' }
+                        };
+                        cell.alignment = { vertical: 'middle', horizontal: colIdx === 2 ? 'right' : (colIdx === 3 ? 'center' : 'left') };
+                        cell.border = {
+                            top: { style: 'thin', color: { argb: 'FF000000' } },
+                            bottom: { style: 'thin', color: { argb: 'FF000000' } },
+                            left: { style: 'thin', color: { argb: 'FF000000' } },
+                            right: { style: 'thin', color: { argb: 'FF000000' } }
+                        };
+                    });
+                    totaleRow.height = 25;
+                    
+                    // Dimensioni colonne
+                    worksheet.getColumn(1).width = 12;
+                    worksheet.getColumn(2).width = 12;
+                    worksheet.getColumn(3).width = 15;
+                    worksheet.getColumn(4).width = 8;
+                    worksheet.getColumn(5).width = 12;
+                    worksheet.getColumn(6).width = 20;
+                    worksheet.getColumn(7).width = 60;
+                });
+                
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const filename = `Calendari_${parametri.nomeCorso.replace(/\s+/g, '_')}_2026.xlsx`;
+                saveAs(blob, filename);
+            };
+
+            const toggleEspansioneCalendario = (indice) => {
+                if (calendariEspansi.includes(indice)) {
+                    setCalendariEspansi(calendariEspansi.filter(i => i !== indice));
+                } else {
+                    setCalendariEspansi([...calendariEspansi, indice]);
+                }
+            };
+
+            // Funzione per calcolare ore dalla differenza tra orari
+            const calcolaOreDaOrari = (orarioInizio, orarioFine) => {
+                if (!orarioInizio || !orarioFine) return 0;
+                const [oreI, minI] = orarioInizio.split(':').map(Number);
+                const [oreF, minF] = orarioFine.split(':').map(Number);
+                const minutiInizio = oreI * 60 + minI;
+                const minutiFine = oreF * 60 + minF;
+                return ((minutiFine - minutiInizio) / 60).toFixed(1);
+            };
+
+            // Funzione per modificare l'orario di una lezione
+            const modificaOrarioLezione = (calendarioIdx, lezioneIdx, campo, valore) => {
+                const chiave = `${calendarioIdx}-${lezioneIdx}`;
+                const modificaCorrente = modificheOrari[chiave] || {};
+
+                const nuovaModifica = {
+                    ...modificaCorrente,
+                    [campo]: valore
+                };
+
+                // Calcola le ore se abbiamo entrambi gli orari
+                if (nuovaModifica.orarioInizio && nuovaModifica.orarioFine) {
+                    nuovaModifica.ore = calcolaOreDaOrari(nuovaModifica.orarioInizio, nuovaModifica.orarioFine);
+                }
+
+                setModificheOrari({
+                    ...modificheOrari,
+                    [chiave]: nuovaModifica
+                });
+            };
+
+            // Funzione per ottenere l'orario di una lezione (modificato o originale)
+            const getOrarioLezione = (calendarioIdx, lezioneIdx, lezione) => {
+                const chiave = `${calendarioIdx}-${lezioneIdx}`;
+                const modifica = modificheOrari[chiave];
+
+                if (modifica && modifica.orarioInizio && modifica.orarioFine) {
+                    return {
+                        orarioInizio: modifica.orarioInizio,
+                        orarioFine: modifica.orarioFine,
+                        ore: parseFloat(modifica.ore)
+                    };
+                }
+
+                // Parsing orario originale
+                let orarioInizio, orarioFine;
+                if (lezione.orario.includes('/')) {
+                    // Formato con pausa: "09:00-13:00 / 14:00-17:00"
+                    const parti = lezione.orario.split(' / ');
+                    orarioInizio = parti[0].split('-')[0].trim();
+                    orarioFine = parti[1].split('-')[1].trim();
+                } else {
+                    // Formato continuo: "09:00 - 14:00"
+                    const parti = lezione.orario.split(' - ');
+                    orarioInizio = parti[0].trim();
+                    orarioFine = parti[1].trim();
+                }
+
+                return {
+                    orarioInizio,
+                    orarioFine,
+                    ore: lezione.ore
+                };
+            };
+
+            // Funzione per calcolare il totale ore di un calendario
+            const calcolaTotaleOreCalendario = (calendarioIdx) => {
+                const calendario = calendari[calendarioIdx];
+                if (!calendario) return 0;
+
+                return calendario.lezioni.reduce((totale, lezione, lezioneIdx) => {
+                    const orari = getOrarioLezione(calendarioIdx, lezioneIdx, lezione);
+                    return totale + orari.ore;
+                }, 0);
+            };
+
+            const aggiornaNumeroDocenti = (numero) => {
+                setParametri({ ...parametri, numeroDocenti: numero });
+                const nuoviNomi = [...nomiDocenti];
+                while (nuoviNomi.length < numero) {
+                    nuoviNomi.push('');
+                }
+                setNomiDocenti(nuoviNomi.slice(0, numero));
+            };
+
+            const aggiornaNomeDocente = (index, nome) => {
+                const nuoviNomi = [...nomiDocenti];
+                nuoviNomi[index] = nome;
+                setNomiDocenti(nuoviNomi);
+            };
+
+            const getNomeDocente = (index) => {
+                return nomiDocenti[index - 1] || `Docente ${index}`;
+            };
+
+            // Calcola opzioni automatiche per distribuzione ore
+            // VINCOLI: MIN 3h, MAX 7h per ogni lezione
+            const calcolaOpzioniDistribuzione = () => {
+                const totale = parametri.oreTotali;
+                const giornata = parametri.oreGiorno;
+                
+                if (totale === 0 || giornata === 0) return [];
+                
+                // Verifica che ore giorno rispetti i vincoli
+                if (giornata < 3 || giornata > 7) {
+                    return []; // Ore giorno non valide
+                }
+                
+                const giorniCompleti = Math.floor(totale / giornata);
+                const resto = totale % giornata;
+                
+                if (resto === 0) {
+                    return []; // Distribuzione perfetta, nessuna opzione da mostrare
+                }
+                
+                // ⚠️ VINCOLO: resto < 3h NON è valido, devo redistribuire
+                const opzioni = [];
+                
+                // Strategia 1: Se resto < 3h, riduco i giorni completi e redistribuisco
+                if (resto < 3) {
+                    // Es: 50h ÷ 7h = 7 giorni + 1h → riduco a 6 giorni da 7h + (1h+7h=8h) da redistribuire
+                    const oreRimanenti = resto + giornata;
+                    const giorniCompletiFix = giorniCompleti - 1;
+                    
+                    // Opzione A: 2 giorni da 4h (se possibile)
+                    if (oreRimanenti === 8) {
+                        opzioni.push({
+                            descrizione: `${giorniCompletiFix} giorni da ${giornata}h + 2 giorni da 4h`,
+                            dettaglio: `${giorniCompletiFix}×${giornata}h + 2×4h = ${totale}h`,
+                            distribuzione: {
+                                [giornata]: giorniCompletiFix,
+                                4: 2
+                            }
+                        });
+                    }
+                    
+                    // Opzione B: Combinazioni con 3h, 4h, 5h, 6h
+                    for (let ore1 = 7; ore1 >= 3; ore1--) {
+                        for (let ore2 = 7; ore2 >= 3; ore2--) {
+                            if (ore1 + ore2 === oreRimanenti && ore1 >= ore2) {
+                                const desc = ore1 === ore2 
+                                    ? `${giorniCompletiFix} giorni da ${giornata}h + 2 giorni da ${ore1}h`
+                                    : `${giorniCompletiFix} giorni da ${giornata}h + 1 giorno da ${ore1}h + 1 giorno da ${ore2}h`;
+                                const det = ore1 === ore2
+                                    ? `${giorniCompletiFix}×${giornata}h + 2×${ore1}h = ${totale}h`
+                                    : `${giorniCompletiFix}×${giornata}h + 1×${ore1}h + 1×${ore2}h = ${totale}h`;
+                                
+                                const distribuzione = { [giornata]: giorniCompletiFix };
+                                if (ore1 === ore2) {
+                                    distribuzione[ore1] = 2;
+                                } else {
+                                    distribuzione[ore1] = 1;
+                                    distribuzione[ore2] = 1;
+                                }
+                                
+                                // Evita duplicati
+                                if (!opzioni.some(o => o.descrizione === desc)) {
+                                    opzioni.push({ descrizione: desc, dettaglio: det, distribuzione });
+                                }
+                                
+                                if (opzioni.length >= 3) break;
+                            }
+                        }
+                        if (opzioni.length >= 3) break;
+                    }
+                    
+                    // Opzione C: Distribuire su più giorni da 3h
+                    const giorniDa3 = Math.ceil(oreRimanenti / 3);
+                    if (giorniDa3 >= 2 && giorniDa3 * 3 <= oreRimanenti + 2) {
+                        const oreUltimo = oreRimanenti - ((giorniDa3 - 1) * 3);
+                        if (oreUltimo >= 3 && oreUltimo <= 7) {
+                            opzioni.push({
+                                descrizione: `${giorniCompletiFix} giorni da ${giornata}h + ${giorniDa3} giorni da 3h`,
+                                dettaglio: `${giorniCompletiFix}×${giornata}h + ${giorniDa3}×3h = ${totale}h`,
+                                distribuzione: {
+                                    [giornata]: giorniCompletiFix,
+                                    3: giorniDa3
+                                }
+                            });
+                        }
+                    }
+                    
+                } else {
+                    // Resto >= 3h, possiamo lavorare con questo
+                    
+                    // Opzione 1: Distribuire resto su giornate da 4h (se resto >= 4)
+                    if (resto >= 4) {
+                        const giorniResto4 = Math.floor(resto / 4);
+                        const restoFinale = resto % 4;
+                        
+                        if (restoFinale === 0) {
+                            // Perfetto, solo giorni da 4h
+                            opzioni.push({
+                                descrizione: `${giorniCompleti} giorni da ${giornata}h + ${giorniResto4} giorni da 4h`,
+                                dettaglio: `${giorniCompleti}×${giornata}h + ${giorniResto4}×4h = ${totale}h`,
+                                distribuzione: {
+                                    [giornata]: giorniCompleti,
+                                    4: giorniResto4
+                                }
+                            });
+                        } else if (restoFinale >= 3) {
+                            // giorniResto4 giorni da 4h + 1 giorno da restoFinale
+                            opzioni.push({
+                                descrizione: `${giorniCompleti} giorni da ${giornata}h + ${giorniResto4} giorni da 4h + 1 giorno da ${restoFinale}h`,
+                                dettaglio: `${giorniCompleti}×${giornata}h + ${giorniResto4}×4h + 1×${restoFinale}h = ${totale}h`,
+                                distribuzione: {
+                                    [giornata]: giorniCompleti,
+                                    4: giorniResto4,
+                                    [restoFinale]: 1
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Opzione 2: Distribuire resto su giornate da 3h
+                    const giorniResto3 = Math.ceil(resto / 3);
+                    opzioni.push({
+                        descrizione: `${giorniCompleti} giorni da ${giornata}h + ${giorniResto3} giorni da 3h`,
+                        dettaglio: `${giorniCompleti}×${giornata}h + ${giorniResto3}×3h = ${totale}h`,
+                        distribuzione: {
+                            [giornata]: giorniCompleti,
+                            3: giorniResto3
+                        }
+                    });
+                    
+                    // Opzione 3: Redistribuire riducendo ore giornata
+                    if (giornata >= 5) {
+                        const giorniMeno = Math.floor(resto / 2);
+                        const nuoviCompleti = giorniCompleti - giorniMeno;
+                        const nuoveOre = giornata - 2;
+                        if (nuoviCompleti > 0 && nuoveOre >= 3) {
+                            const giorniNuoveOre = giorniMeno * 2;
+                            if (nuoviCompleti * giornata + giorniNuoveOre * nuoveOre === totale) {
+                                opzioni.push({
+                                    descrizione: `${nuoviCompleti} giorni da ${giornata}h + ${giorniNuoveOre} giorni da ${nuoveOre}h`,
+                                    dettaglio: `${nuoviCompleti}×${giornata}h + ${giorniNuoveOre}×${nuoveOre}h = ${totale}h`,
+                                    distribuzione: {
+                                        [giornata]: nuoviCompleti,
+                                        [nuoveOre]: giorniNuoveOre
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                return opzioni.slice(0, 3); // Max 3 opzioni
+            };
+
+            const getOrePersonalizzateTotali = () => {
+                const p = distribuzioneOre.personalizzata;
+                return (p.ore7 * 7) + (p.ore6 * 6) + (p.ore5 * 5) + (p.ore4 * 4) + (p.ore3 * 3);
+            };
+
+            const aggiornaDistribuzionePersonalizzata = (ore, valore) => {
+                setDistribuzioneOre({
+                    ...distribuzioneOre,
+                    personalizzata: {
+                        ...distribuzioneOre.personalizzata,
+                        [ore]: parseInt(valore) || 0
+                    }
+                });
+            };
+
+            // Valida che la distribuzione personalizzata rispetti i vincoli 3-7h
+            const isDistribuzionePersonalizzataValida = () => {
+                const p = distribuzioneOre.personalizzata;
+                const totalePersonalizzato = getOrePersonalizzateTotali();
+                
+                // Deve essere uguale al totale corso
+                if (totalePersonalizzato !== parametri.oreTotali) {
+                    return false;
+                }
+                
+                // Tutti i valori devono essere >= 0
+                if (p.ore7 < 0 || p.ore6 < 0 || p.ore5 < 0 || p.ore4 < 0 || p.ore3 < 0) {
+                    return false;
+                }
+                
+                return true;
+            };
+
+            // Ottiene array di ore per ogni giornata basato sulla distribuzione scelta
+            const getArrayOreGiornate = () => {
+                const opzioni = calcolaOpzioniDistribuzione();
+                
+                // Se distribuzione perfetta, usa ore standard
+                if (opzioni.length === 0) {
+                    const numGiorni = Math.floor(parametri.oreTotali / parametri.oreGiorno);
+                    return Array(numGiorni).fill(parametri.oreGiorno);
+                }
+                
+                let distribuzione = {};
+                
+                if (distribuzioneOre.modalita === 'automatica' && distribuzioneOre.opzioneScelta !== null) {
+                    // Usa opzione automatica scelta
+                    distribuzione = opzioni[distribuzioneOre.opzioneScelta].distribuzione;
+                } else if (distribuzioneOre.modalita === 'personalizzata') {
+                    // Usa distribuzione personalizzata
+                    const p = distribuzioneOre.personalizzata;
+                    if (p.ore7 > 0) distribuzione[7] = p.ore7;
+                    if (p.ore6 > 0) distribuzione[6] = p.ore6;
+                    if (p.ore5 > 0) distribuzione[5] = p.ore5;
+                    if (p.ore4 > 0) distribuzione[4] = p.ore4;
+                    if (p.ore3 > 0) distribuzione[3] = p.ore3;
+                } else {
+                    // Nessuna opzione selezionata, usa prima opzione automatica
+                    distribuzione = opzioni[0].distribuzione;
+                }
+                
+                // Crea array con ordine: prima 7h, poi 6h, 5h, 4h, 3h
+                const arrayOre = [];
+                [7, 6, 5, 4, 3].forEach(ore => {
+                    if (distribuzione[ore]) {
+                        for (let i = 0; i < distribuzione[ore]; i++) {
+                            arrayOre.push(ore);
+                        }
+                    }
+                });
+                
+                return arrayOre;
+            };
+
+            return (
+                <div>
+                    <div className="header">
+                        <div className="container">
+                            <div className="header-content">
+                                <h1>
+                                    <svg className="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Generatore Calendari Corsi 2026
+                                </h1>
+                                <p>SONODIGITALE - Tool per Arianna @ Atoma srl</p>
+                            </div>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                                <button
+                                    onClick={() => setMostraGuida(true)}
+                                    className="btn-guida"
+                                    title="Apri guida utente"
+                                >
+                                    <svg style={{width: '20px', height: '20px', marginRight: '0.5rem'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    Guida
+                                </button>
+                                <img src="SONODIGITALE INTERO.svg" alt="SONODIGITALE Logo" className="header-logo" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="container">
+                        {/* Template */}
+                        <div className="section">
+                            <div className="section-title">
+                                <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                1. Scegli Template Corso
+                            </div>
+                            <div className="grid grid-cols-3">
+                                <button
+                                    onClick={() => caricaTemplate('ai100')}
+                                    className={`template-card ${templateSelezionato === 'ai100' ? 'active' : ''}`}
+                                >
+                                    <div className="title">AI Start - 100 ore</div>
+                                    <div className="subtitle">4 settimane, 5h/giorno, 20 lezioni</div>
+                                </button>
+                                <button
+                                    onClick={() => caricaTemplate('social50')}
+                                    className={`template-card ${templateSelezionato === 'social50' ? 'active' : ''}`}
+                                >
+                                    <div className="title">Social Media Manager - 50 ore</div>
+                                    <div className="subtitle">3 settimane, 4h/giorno, 13 lezioni</div>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setTemplateSelezionato('custom');
+                                        setProgramma([]); // 🎯 NON creare lezioni subito
+                                        setParametri({
+                                            ...parametri,
+                                            nomeCorso: '',
+                                            oreTotali: 0,
+                                            oreGiorno: 0
+                                        });
+                                        // Reset distribuzione
+                                        setDistribuzioneOre({
+                                            modalita: 'automatica',
+                                            opzioneScelta: null,
+                                            personalizzata: {
+                                                ore7: 0,
+                                                ore6: 0,
+                                                ore5: 0,
+                                                ore4: 0,
+                                                ore3: 0
+                                            }
+                                        });
+                                    }}
+                                    className={`template-card ${templateSelezionato === 'custom' ? 'active' : ''}`}
+                                >
+                                    <div className="title">Corso Personalizzato</div>
+                                    <div className="subtitle">Crea da zero</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Parametri */}
+                        <div className="section">
+                            <div className="section-title">
+                                <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                2. Parametri Corso
+                            </div>
+                            <div className="grid grid-cols-4">
+                                <div className="form-group">
+                                    <label className="form-label">Nome Corso</label>
+                                    <input
+                                        type="text"
+                                        value={parametri.nomeCorso}
+                                        onChange={(e) => setParametri({ ...parametri, nomeCorso: e.target.value })}
+                                        className="form-input"
+                                        placeholder="Es: AI Start"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Ore Totali</label>
+                                    <input
+                                        type="number"
+                                        value={parametri.oreTotali}
+                                        onChange={(e) => setParametri({ ...parametri, oreTotali: parseInt(e.target.value) || 0 })}
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Ore al Giorno</label>
+                                    <input
+                                        type="number"
+                                        value={parametri.oreGiorno}
+                                        onChange={(e) => setParametri({ ...parametri, oreGiorno: parseInt(e.target.value) || 0 })}
+                                        className="form-input"
+                                        min="3"
+                                        max="7"
+                                    />
+                                    {(parametri.oreGiorno < 3 || parametri.oreGiorno > 7) && parametri.oreGiorno !== 0 && (
+                                        <div style={{fontSize: '0.75rem', color: '#dc2626', marginTop: '0.25rem'}}>
+                                            ⚠️ Le lezioni devono essere tra 3h e 7h
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Numero Docenti</label>
+                                    <input
+                                        type="number"
+                                        value={parametri.numeroDocenti}
+                                        onChange={(e) => aggiornaNumeroDocenti(parseInt(e.target.value) || 1)}
+                                        className="form-input"
+                                        min="1"
+                                        max="10"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Tipo Lezione Default</label>
+                                    <select
+                                        value={parametri.tipoDefault}
+                                        onChange={(e) => setParametri({ ...parametri, tipoDefault: e.target.value })}
+                                        className="form-select"
+                                        style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem'}}
+                                    >
+                                        <option value="presenza">🏫 In Presenza</option>
+                                        <option value="online">🌐 Online</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Orario Inizio</label>
+                                    <input
+                                        type="time"
+                                        value={parametri.orarioInizio}
+                                        onChange={(e) => setParametri({ ...parametri, orarioInizio: e.target.value })}
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Orario Fine</label>
+                                    <input
+                                        type="time"
+                                        value={parametri.orarioFine}
+                                        onChange={(e) => setParametri({ ...parametri, orarioFine: e.target.value })}
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Data Inizio Periodo</label>
+                                    <input
+                                        type="date"
+                                        value={parametri.dataInizio}
+                                        onChange={(e) => setParametri({ ...parametri, dataInizio: e.target.value })}
+                                        className="form-input"
+                                        min="2026-01-01"
+                                        max="2026-12-31"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Data Fine Periodo</label>
+                                    <input
+                                        type="date"
+                                        value={parametri.dataFine}
+                                        onChange={(e) => setParametri({ ...parametri, dataFine: e.target.value })}
+                                        className="form-input"
+                                        min="2026-01-01"
+                                        max="2026-12-31"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Box Festività nel Periodo */}
+                            {parametri.dataInizio && parametri.dataFine && (() => {
+                                const festivitaNelPeriodo = getFestivitaNelPeriodo();
+                                if (festivitaNelPeriodo.length > 0) {
+                                    return (
+                                        <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
+                                            <div style={{
+                                                backgroundColor: '#dbeafe',
+                                                border: '2px solid #3b82f6',
+                                                borderRadius: '0.5rem',
+                                                padding: '1rem'
+                                            }}>
+                                                <div style={{
+                                                    fontWeight: 'bold',
+                                                    color: '#1e40af',
+                                                    marginBottom: '0.5rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}>
+                                                    🎉 Festività nel periodo selezionato ({festivitaNelPeriodo.length}):
+                                                </div>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    gap: '0.5rem',
+                                                    marginTop: '0.5rem'
+                                                }}>
+                                                    {festivitaNelPeriodo.map((festa, idx) => (
+                                                        <div key={idx} style={{
+                                                            backgroundColor: '#fef3c7',
+                                                            color: '#92400e',
+                                                            padding: '0.25rem 0.75rem',
+                                                            borderRadius: '0.25rem',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: '500'
+                                                        }}>
+                                                            {new Date(festa.data).toLocaleDateString('it-IT')} - {festa.nome}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
+
+                            {/* Nomi Docenti */}
+                            {parametri.numeroDocenti > 0 && (
+                                <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
+                                    <label className="form-label" style={{marginBottom: '0.75rem', display: 'block', fontSize: '1rem', fontWeight: '600'}}>
+                                        📝 Nomi Docenti (opzionale)
+                                    </label>
+                                    <div style={{fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem'}}>
+                                        Lascia vuoto per usare "Docente 1", "Docente 2", ecc. Puoi inserire solo alcuni nomi.
+                                    </div>
+                                    <div className="grid grid-cols-4">
+                                        {Array.from({ length: parametri.numeroDocenti }, (_, i) => (
+                                            <div key={i} className="form-group">
+                                                <label className="form-label">Docente {i + 1}</label>
+                                                <input
+                                                    type="text"
+                                                    value={nomiDocenti[i] || ''}
+                                                    onChange={(e) => aggiornaNomeDocente(i, e.target.value)}
+                                                    className="form-input"
+                                                    placeholder={`Docente ${i + 1}`}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Giorni della settimana */}
+                            <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
+                                <label className="form-label" style={{marginBottom: '0.75rem', display: 'block', fontSize: '1rem', fontWeight: '600'}}>
+                                    📅 Giorni Lavorativi
+                                </label>
+                                <div style={{display: 'flex', gap: '0.75rem', flexWrap: 'wrap'}}>
+                                    {[
+                                        { num: 1, nome: 'Lunedì' },
+                                        { num: 2, nome: 'Martedì' },
+                                        { num: 3, nome: 'Mercoledì' },
+                                        { num: 4, nome: 'Giovedì' },
+                                        { num: 5, nome: 'Venerdì' },
+                                        { num: 6, nome: 'Sabato' },
+                                        { num: 7, nome: 'Domenica' },
+                                    ].map(giorno => (
+                                        <label key={giorno.num} className="radio-label" style={{
+                                            padding: '0.5rem 1rem',
+                                            borderRadius: '0.375rem',
+                                            border: '2px solid',
+                                            borderColor: parametri.giorni.includes(giorno.num) ? '#FC7E15' : '#e5e7eb',
+                                            backgroundColor: parametri.giorni.includes(giorno.num) ? '#fff7ed' : 'white',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={parametri.giorni.includes(giorno.num)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setParametri({ ...parametri, giorni: [...parametri.giorni, giorno.num].sort() });
+                                                    } else {
+                                                        setParametri({ ...parametri, giorni: parametri.giorni.filter(d => d !== giorno.num) });
+                                                    }
+                                                }}
+                                            />
+                                            {giorno.nome}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Distribuzione Ore (solo se necessario) */}
+                        {(() => {
+                            const opzioni = calcolaOpzioniDistribuzione();
+                            const totalePersonalizzato = getOrePersonalizzateTotali();
+                            const isValido = totalePersonalizzato === parametri.oreTotali;
+                            
+                            if (opzioni.length > 0 && templateSelezionato === 'custom') {
+                                return (
+                                    <div className="section">
+                                        <div className="section-title">
+                                            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            3. Distribuzione Ore
+                                        </div>
+
+                                        <div className="alert alert-warning">
+                                            <strong>⚠️ Attenzione:</strong> {parametri.oreTotali}h ÷ {parametri.oreGiorno}h al giorno = {Math.floor(parametri.oreTotali / parametri.oreGiorno)} giorni completi + {parametri.oreTotali % parametri.oreGiorno}h di resto.<br />
+                                            <strong>Scegli come distribuire il resto:</strong><br />
+                                            <small>⚠️ <strong>VINCOLI:</strong> Ogni lezione deve essere minimo 3h e massimo 7h. Lezioni da 7h = 9:00-13:00 / 14:00-17:00 (con pausa pranzo).</small>
+                                        </div>
+
+                                        <div className="distribuzione-section">
+                                            <div className="distribuzione-title">📊 Opzioni Distribuzione</div>
+                                            
+                                            {/* Opzioni Automatiche */}
+                                            {opzioni.map((opzione, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className={`opzione-card ${distribuzioneOre.modalita === 'automatica' && distribuzioneOre.opzioneScelta === idx ? 'selected' : ''}`}
+                                                    onClick={() => setDistribuzioneOre({ modalita: 'automatica', opzioneScelta: idx, personalizzata: distribuzioneOre.personalizzata })}
+                                                >
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={distribuzioneOre.modalita === 'automatica' && distribuzioneOre.opzioneScelta === idx}
+                                                            onChange={() => {}}
+                                                        />
+                                                        <div style={{flex: 1}}>
+                                                            <div className="opzione-descrizione">Opzione {String.fromCharCode(65 + idx)}: {opzione.descrizione}</div>
+                                                            <div className="opzione-dettaglio">{opzione.dettaglio}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Opzione Personalizzata */}
+                                            <div
+                                                className={`opzione-card ${distribuzioneOre.modalita === 'personalizzata' ? 'selected' : ''}`}
+                                                onClick={() => setDistribuzioneOre({ ...distribuzioneOre, modalita: 'personalizzata' })}
+                                            >
+                                                <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem'}}>
+                                                    <input
+                                                        type="radio"
+                                                        checked={distribuzioneOre.modalita === 'personalizzata'}
+                                                        onChange={() => {}}
+                                                    />
+                                                    <div className="opzione-descrizione">Personalizzata (tu decidi)</div>
+                                                </div>
+
+                                                {distribuzioneOre.modalita === 'personalizzata' && (
+                                                    <div style={{marginTop: '0.75rem', paddingLeft: '1.5rem'}}>
+                                                        <div style={{fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem'}}>
+                                                            ℹ️ Inserisci il numero di giorni per ogni fascia oraria (solo 3h-7h permessi).
+                                                        </div>
+                                                        <div className="personalizzata-grid">
+                                                            {[7, 6, 5, 4, 3].map(ore => (
+                                                                <div key={ore} className="ore-input-group">
+                                                                    <label className="ore-input-label">Giorni da {ore}h</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        value={distribuzioneOre.personalizzata[`ore${ore}`]}
+                                                                        onChange={(e) => aggiornaDistribuzionePersonalizzata(`ore${ore}`, e.target.value)}
+                                                                        className="form-input ore-input"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    />
+                                                                    <div className="ore-calcolo">
+                                                                        = {distribuzioneOre.personalizzata[`ore${ore}`] * ore}h
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+
+                                                        <div className={`totale-ore ${isValido ? 'valido' : 'non-valido'}`}>
+                                                            Totale: {totalePersonalizzato}h / {parametri.oreTotali}h {isValido ? '✅ Perfetto!' : `❌ ${totalePersonalizzato > parametri.oreTotali ? 'Troppe' : 'Mancano'} ${Math.abs(totalePersonalizzato - parametri.oreTotali)} ore`}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
+
+                        {/* Esclusioni Personalizzate */}
+                        <div className="section">
+                            <div className="section-title">
+                                <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                </svg>
+                                {calcolaOpzioniDistribuzione().length > 0 && templateSelezionato === 'custom' ? '4' : '3'}. Esclusioni Personalizzate (Chiusure Atoma)
+                            </div>
+
+                            <div className="alert alert-warning">
+                                <strong>ℹ️ Le festività nazionali italiane sono già escluse automaticamente.</strong><br />
+                                Usa questa sezione per aggiungere chiusure aziendali extra (es: settimana di Pasqua estesa, chiusura estiva, ecc.)
+                            </div>
+
+                            <div className="radio-group">
+                                <label className="radio-label">
+                                    <input
+                                        type="radio"
+                                        checked={tipoEsclusione === 'singola'}
+                                        onChange={() => setTipoEsclusione('singola')}
+                                    />
+                                    Giorno Singolo
+                                </label>
+                                <label className="radio-label">
+                                    <input
+                                        type="radio"
+                                        checked={tipoEsclusione === 'periodo'}
+                                        onChange={() => setTipoEsclusione('periodo')}
+                                    />
+                                    Periodo (Range)
+                                </label>
+                            </div>
+
+                            <div className="exclusion-form">
+                                {tipoEsclusione === 'singola' ? (
+                                    <div className="form-group">
+                                        <label className="form-label">Data</label>
+                                        <input
+                                            type="date"
+                                            value={dataEsclusione}
+                                            onChange={(e) => setDataEsclusione(e.target.value)}
+                                            className="form-input"
+                                            min="2026-01-01"
+                                            max="2026-12-31"
+                                        />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="form-group">
+                                            <label className="form-label">Da</label>
+                                            <input
+                                                type="date"
+                                                value={dataInizioPeriodo}
+                                                onChange={(e) => setDataInizioPeriodo(e.target.value)}
+                                                className="form-input"
+                                                min="2026-01-01"
+                                                max="2026-12-31"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">A</label>
+                                            <input
+                                                type="date"
+                                                value={dataFinePeriodo}
+                                                onChange={(e) => setDataFinePeriodo(e.target.value)}
+                                                className="form-input"
+                                                min="2026-01-01"
+                                                max="2026-12-31"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                
+                                <div className="form-group">
+                                    <label className="form-label">Motivo (opzionale)</label>
+                                    <input
+                                        type="text"
+                                        value={motivoEsclusione}
+                                        onChange={(e) => setMotivoEsclusione(e.target.value)}
+                                        className="form-input"
+                                        placeholder="Es: Chiusura Pasqua"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">&nbsp;</label>
+                                    <button onClick={aggiungiEsclusione} className="btn btn-add">
+                                        <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Aggiungi
+                                    </button>
+                                </div>
+                            </div>
+
+                            {esclusioni.length > 0 && (
+                                <div style={{marginTop: '1rem'}}>
+                                    <strong>Esclusioni aggiunte ({esclusioni.length}):</strong>
+                                    <div style={{marginTop: '0.5rem'}}>
+                                        {esclusioni.map(escl => (
+                                            <div key={escl.id} className="esclusione-item">
+                                                <div>
+                                                    {escl.tipo === 'singola' ? (
+                                                        <div className="esclusione-text">
+                                                            <span className="esclusione-date">{new Date(escl.data).toLocaleDateString('it-IT')}</span>
+                                                            {escl.motivo && ` - ${escl.motivo}`}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="esclusione-text">
+                                                            <span className="esclusione-date">
+                                                                {new Date(escl.dataInizio).toLocaleDateString('it-IT')} → {new Date(escl.dataFine).toLocaleDateString('it-IT')}
+                                                            </span>
+                                                            {escl.motivo && ` - ${escl.motivo}`}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button onClick={() => rimuoviEsclusione(escl.id)} className="btn btn-remove">
+                                                    <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Programma - 🎯 MOSTRATO SOLO SE CI SONO LEZIONI */}
+                        {programma.length > 0 && (
+                            <div className="section">
+                                <div className="section-header">
+                                    <div className="section-title">
+                                        <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        {calcolaOpzioniDistribuzione().length > 0 && templateSelezionato === 'custom' ? '5' : '4'}. Programma Didattico ({programma.length} lezioni)
+                                    </div>
+                                    <button onClick={aggiungiLezione} className="btn btn-add">
+                                        <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Aggiungi Lezione
+                                    </button>
+                                </div>
+
+                                {templateSelezionato === 'custom' && (
+                                    <div className="alert alert-success" style={{marginBottom: '1rem'}}>
+                                        <strong>✅ Lezioni generate automaticamente!</strong><br />
+                                        Il programma è stato creato con {programma.length} lezioni in base alla distribuzione ore scelta. Compila i moduli e gli argomenti per ogni lezione.
+                                    </div>
+                                )}
+
+                                <div className="programma-container">
+                                    {programma.map((lezione, index) => (
+                                        <div key={index} style={{marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem', border: '2px solid #e5e7eb'}}>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem'}}>
+                                                <div style={{fontWeight: 'bold', fontSize: '1rem', minWidth: '80px', color: '#196C28'}}>Giorno {lezione.giorno}</div>
+                                                <input
+                                                    type="text"
+                                                    value={lezione.modulo}
+                                                    onChange={(e) => aggiornaLezione(index, 'modulo', e.target.value)}
+                                                    className="form-input"
+                                                    placeholder="Nome Modulo"
+                                                    style={{flex: 1}}
+                                                />
+                                                <div style={{fontSize: '0.875rem', fontWeight: 'bold', color: lezione.oreGiornata ? '#196C28' : '#999', minWidth: '60px', textAlign: 'right'}}>
+                                                    {lezione.oreGiornata ? `${lezione.oreGiornata}h` : '—'}
+                                                </div>
+                                                <button onClick={() => rimuoviLezione(index)} className="btn btn-remove">
+                                                    <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={lezione.argomenti}
+                                                onChange={(e) => aggiornaLezione(index, 'argomenti', e.target.value)}
+                                                className="form-input"
+                                                placeholder="Argomenti della lezione"
+                                                style={{marginBottom: '0.75rem'}}
+                                            />
+
+                                            <div style={{marginBottom: '0.75rem'}}>
+                                                <label style={{display: 'block', fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.25rem'}}>Tipo Lezione</label>
+                                                <select
+                                                    value={lezione.tipoLezione || 'presenza'}
+                                                    onChange={(e) => aggiornaLezione(index, 'tipoLezione', e.target.value)}
+                                                    className="form-select"
+                                                    style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db'}}
+                                                >
+                                                    <option value="presenza">🏫 In Presenza</option>
+                                                    <option value="online">🌐 Online</option>
+                                                </select>
+                                            </div>
+
+                                            <div style={{backgroundColor: 'white', padding: '0.75rem', borderRadius: '0.375rem', marginBottom: '0.75rem'}}>
+                                                <div style={{fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.5rem'}}>⏰ ORARI</div>
+                                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Inizio</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.orarioInizio || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'orarioInizio', e.target.value)}
+                                                            className="form-input"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Fine</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.orarioFine || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'orarioFine', e.target.value)}
+                                                            className="form-input"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Pausa Da</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.pausaInizio || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'pausaInizio', e.target.value)}
+                                                            className="form-input"
+                                                            placeholder="Opzionale"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Pausa A</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.pausaFine || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'pausaFine', e.target.value)}
+                                                            className="form-input"
+                                                            placeholder="Opzionale"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Totale Ore */}
+                                <div style={{
+                                    marginTop: '1.5rem',
+                                    padding: '1rem',
+                                    backgroundColor: calcolaTotaleOreProgramma() === parametri.oreTotali ? '#d1fae5' : '#fee2e2',
+                                    borderRadius: '0.5rem',
+                                    border: `2px solid ${calcolaTotaleOreProgramma() === parametri.oreTotali ? '#196C28' : '#dc2626'}`,
+                                    textAlign: 'center',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {calcolaTotaleOreProgramma() === parametri.oreTotali ? '✅' : '⚠️'} Totale Ore Programma: {calcolaTotaleOreProgramma()}h / {parametri.oreTotali}h
+                                    {calcolaTotaleOreProgramma() !== parametri.oreTotali && (
+                                        <div style={{fontSize: '0.875rem', marginTop: '0.5rem', color: '#dc2626'}}>
+                                            Differenza: {(calcolaTotaleOreProgramma() - parametri.oreTotali).toFixed(1)}h
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Calcola */}
+                        <div className="section">
+                            <button onClick={calcolaCorsi} className="btn btn-primary">
+                                <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Calcola Corsi e Genera Calendari
+                            </button>
+                        </div>
+
+                        {/* Risultati */}
+                        {risultati && (
+                            <div className="section">
+                                <div className="result-title">📊 Risultati Calcolo</div>
+                                
+                                <div className="alert alert-info" style={{marginBottom: '1rem'}}>
+                                    <strong>📅 Giorni esclusi dal calcolo:</strong><br />
+                                    • Festività nazionali: {risultati.festivita}<br />
+                                    • Esclusioni personalizzate: {risultati.esclusioni}<br />
+                                    • Weekend e giorni non lavorativi
+                                </div>
+
+                                <div className="stats-grid">
+                                    <div className="stat-card gray">
+                                        <div className="stat-label">Giorni Necessari</div>
+                                        <div className="stat-value">{risultati.giorniNecessari}</div>
+                                    </div>
+                                    <div className="stat-card gray">
+                                        <div className="stat-label">Giorni Disponibili</div>
+                                        <div className="stat-value">{risultati.giorniDisponibili}</div>
+                                    </div>
+                                    <div className="stat-card gray">
+                                        <div className="stat-label">Corsi per Docente</div>
+                                        <div className="stat-value">{risultati.corsiPerDocente}</div>
+                                    </div>
+                                    <div className="stat-card orange">
+                                        <div className="stat-label">Corsi Totali</div>
+                                        <div className="stat-value">{risultati.corsiTotali}</div>
+                                    </div>
+                                </div>
+
+                                {calendari.length > 0 && (
+                                    <>
+                                        <button onClick={esportaExcel} className="btn btn-success">
+                                            <svg style={{width: '20px', height: '20px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            Scarica Tutti i Calendari Excel
+                                        </button>
+
+                                        <div className="info-text">
+                                            Generati {calendari.length} calendari completi
+                                        </div>
+
+                                        <div>
+                                            {calendari.map((calendario, idx) => {
+                                                const isEspanso = calendariEspansi.includes(idx);
+                                                const lezioniDaMostrare = isEspanso ? calendario.lezioni : calendario.lezioni.slice(0, 5);
+                                                
+                                                return (
+                                                    <div key={idx} className="calendario-card">
+                                                        <div className="calendario-title">{calendario.nome}</div>
+                                                        <div className="calendario-date">
+                                                            📅 {calendario.dataInizio.toLocaleDateString('it-IT')} → {calendario.dataFine.toLocaleDateString('it-IT')} ({calendario.lezioni.length} lezioni)
+                                                        </div>
+                                                        <div className="table-container">
+                                                            <table>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Data</th>
+                                                                        <th>Giorno</th>
+                                                                        <th>Orario</th>
+                                                                        <th>Ore</th>
+                                                                        <th>Tipo</th>
+                                                                        <th>Modulo</th>
+                                                                        <th>Argomenti</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {lezioniDaMostrare.map((lezione, lidx) => (
+                                                                        <tr key={lidx}>
+                                                                            <td>{lezione.data.toLocaleDateString('it-IT')}</td>
+                                                                            <td>{lezione.giorno}</td>
+                                                                            <td>{lezione.orario}</td>
+                                                                            <td style={{textAlign: 'center'}}>{lezione.ore}h</td>
+                                                                            <td style={{textAlign: 'center'}}>
+                                                                                {lezione.tipoLezione === 'online' ? '🌐' : '🏫'}
+                                                                            </td>
+                                                                            <td>{lezione.modulo}</td>
+                                                                            <td style={{fontSize: '0.75rem'}}>
+                                                                                {isEspanso ? lezione.argomenti : (
+                                                                                    <>
+                                                                                        {lezione.argomenti.substring(0, 80)}{lezione.argomenti.length > 80 ? '...' : ''}
+                                                                                    </>
+                                                                                )}
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        {calendario.lezioni.length > 5 && (
+                                                            <button 
+                                                                onClick={() => toggleEspansioneCalendario(idx)} 
+                                                                className="btn btn-expand"
+                                                            >
+                                                                {isEspanso ? (
+                                                                    <>
+                                                                        <svg style={{width: '16px', height: '16px', display: 'inline-block', marginRight: '0.5rem'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                                                        </svg>
+                                                                        Mostra meno
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <svg style={{width: '16px', height: '16px', display: 'inline-block', marginRight: '0.5rem'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                        </svg>
+                                                                        Mostra tutte le {calendario.lezioni.length} lezioni
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Modale Guida */}
+                    {mostraGuida && (
+                        <div className="modal-overlay" onClick={() => setMostraGuida(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>📖 Guida Utente - Generatore Calendari Corsi</h2>
+                                    <button className="modal-close" onClick={() => setMostraGuida(false)}>
+                                        <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <section className="guida-section">
+                                        <h3>🎯 Introduzione</h3>
+                                        <p>Benvenuta! Questo strumento ti permette di generare automaticamente i calendari dei corsi per l'anno 2026.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📋 1. Scegli Template o Corso Personalizzato</h3>
+                                        <ul>
+                                            <li><strong>Template preconfigurati:</strong> Clicca su "AI Start" o "Social Media Manager" per caricare corsi già impostati</li>
+                                            <li><strong>Corso personalizzato:</strong> Clicca su "Personalizzato" per creare un corso da zero</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>⚙️ 2. Configura i Parametri Corso</h3>
+                                        <ul>
+                                            <li><strong>Nome Corso:</strong> Inserisci il nome del corso</li>
+                                            <li><strong>Ore Totali:</strong> Durata totale del corso in ore</li>
+                                            <li><strong>Ore al Giorno:</strong> Ore di lezione per ogni giorno (da 3 a 7 ore)</li>
+                                            <li><strong>Tipo Lezione Default:</strong> Scegli se le lezioni sono "In Presenza" o "Online" (puoi modificare singolarmente dopo)</li>
+                                            <li><strong>Numero Docenti:</strong> Quanti docenti terranno il corso</li>
+                                            <li><strong>Orari:</strong> Orario di inizio e fine predefiniti</li>
+                                            <li><strong>Date Periodo:</strong> Seleziona il periodo in cui può svolgersi il corso</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📊 3. Distribuzione Ore</h3>
+                                        <p>Se le ore totali non sono divisibili perfettamente per le ore giornaliere, vedrai diverse opzioni di distribuzione. Scegli quella che preferisci.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📝 4. Programma Didattico</h3>
+                                        <p>Qui puoi personalizzare ogni singola lezione:</p>
+                                        <ul>
+                                            <li><strong>Modulo e Argomenti:</strong> Descrivi il contenuto di ogni lezione</li>
+                                            <li><strong>Tipo Lezione:</strong> Cambia da Presenza a Online se necessario per lezioni specifiche</li>
+                                            <li><strong>Orari:</strong> Personalizza gli orari per ogni lezione</li>
+                                            <li><strong>Pause:</strong> Aggiungi le pause pranzo o altre interruzioni</li>
+                                            <li><strong>Controllo Totale:</strong> Verifica che il totale ore corrisponda (indicatore verde ✅ = corretto)</li>
+                                        </ul>
+                                        <p><em>💡 Suggerimento: Le lezioni da 7 ore vengono pre-impostate automaticamente con orario 09:00-17:00 e pausa 13:00-14:00</em></p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>🚫 5. Date da Escludere</h3>
+                                        <ul>
+                                            <li>Le festività italiane 2026 sono già precaricate</li>
+                                            <li>Puoi aggiungere altre date da escludere (singole o periodi)</li>
+                                            <li>Utile per ferie, chiusure aziendali, ecc.</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>🎨 6. Genera Calendari</h3>
+                                        <p>Clicca su "Calcola Corsi e Genera Calendari" per vedere l'anteprima dei calendari per ogni docente.</p>
+                                        <p>Nelle anteprime vedrai:</p>
+                                        <ul>
+                                            <li>Data e giorno della settimana</li>
+                                            <li>Orari di ogni lezione</li>
+                                            <li>Ore totali</li>
+                                            <li>Tipo (🏫 Presenza / 🌐 Online)</li>
+                                            <li>Modulo e argomenti</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📥 7. Scarica Excel</h3>
+                                        <p>Clicca su "Scarica Tutti i Calendari (Excel)" per scaricare un file Excel con un foglio per ogni calendario generato.</p>
+                                        <p>Il file Excel contiene tutte le informazioni in formato professionale, pronto per essere condiviso.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>💡 Suggerimenti</h3>
+                                        <ul>
+                                            <li>Inizia sempre da un template se disponibile - risparmia tempo!</li>
+                                            <li>Controlla sempre il totale ore nel Programma Didattico prima di generare</li>
+                                            <li>Usa le pause per lezioni lunghe (7 ore) per rispettare le normative</li>
+                                            <li>Verifica le anteprime prima di scaricare l'Excel</li>
+                                        </ul>
+                                    </section>
+
+                                    <div style={{textAlign: 'center', marginTop: '2rem', padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem'}}>
+                                        <p style={{margin: 0, color: '#196C28', fontWeight: 'bold'}}>
+                                            Per qualsiasi dubbio o problema, contatta il supporto tecnico! 🚀
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<CalendarioCorsiApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
