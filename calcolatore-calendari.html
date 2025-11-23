@@ -1356,7 +1356,8 @@
 
                         // Ottieni orari modificati o originali
                         const orari = getOrarioLezione(idx, lezioneIdx, lezione);
-                        const orarioCompleto = `${orari.orarioInizio} - ${orari.orarioFine}`;
+                        // Usa l'orario originale che include la pausa formattata correttamente
+                        const orarioCompleto = lezione.orario;
 
                         const rowData = [
                             lezione.data.toLocaleDateString('it-IT'),
