@@ -589,6 +589,157 @@
         .footer-text {
             color: #d1d5db;
         }
+
+        /* Pulsante Guida */
+        .btn-guida {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #196C28;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-guida:hover {
+            background-color: #1a7a2e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 800px;
+            max-height: 90vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            background: linear-gradient(to right, #196C28, #1a7a2e);
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .guida-section {
+            margin-bottom: 2rem;
+        }
+
+        .guida-section h3 {
+            color: #196C28;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .guida-section p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .guida-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .guida-section ul li {
+            color: #4b5563;
+            line-height: 1.8;
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .guida-section ul li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #196C28;
+            font-weight: bold;
+        }
+
+        .guida-section em {
+            background-color: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-style: normal;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                max-height: 95vh;
+                margin: 0.5rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .guida-section h3 {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -639,6 +790,7 @@
             const [dataInizioPeriodo, setDataInizioPeriodo] = useState('');
             const [dataFinePeriodo, setDataFinePeriodo] = useState('');
             const [motivoEsclusione, setMotivoEsclusione] = useState('');
+            const [mostraGuida, setMostraGuida] = useState(false);
 
             // Festività italiane 2026
             const festivitaItaliane2026 = [
@@ -1624,7 +1776,19 @@
                                 </h1>
                                 <p>SONODIGITALE - Tool per Arianna @ Atoma srl</p>
                             </div>
-                            <img src="SONODIGITALE INTERO.svg" alt="SONODIGITALE Logo" className="header-logo" />
+                            <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                                <button
+                                    onClick={() => setMostraGuida(true)}
+                                    className="btn-guida"
+                                    title="Apri guida utente"
+                                >
+                                    <svg style={{width: '20px', height: '20px', marginRight: '0.5rem'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    Guida
+                                </button>
+                                <img src="SONODIGITALE INTERO.svg" alt="SONODIGITALE Logo" className="header-logo" />
+                            </div>
                         </div>
                     </div>
 
@@ -2405,6 +2569,111 @@
                             </div>
                         )}
                     </div>
+
+                    {/* Modale Guida */}
+                    {mostraGuida && (
+                        <div className="modal-overlay" onClick={() => setMostraGuida(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>📖 Guida Utente - Generatore Calendari Corsi</h2>
+                                    <button className="modal-close" onClick={() => setMostraGuida(false)}>
+                                        <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <section className="guida-section">
+                                        <h3>🎯 Introduzione</h3>
+                                        <p>Benvenuta! Questo strumento ti permette di generare automaticamente i calendari dei corsi per l'anno 2026.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📋 1. Scegli Template o Corso Personalizzato</h3>
+                                        <ul>
+                                            <li><strong>Template preconfigurati:</strong> Clicca su "AI Start" o "Social Media Manager" per caricare corsi già impostati</li>
+                                            <li><strong>Corso personalizzato:</strong> Clicca su "Personalizzato" per creare un corso da zero</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>⚙️ 2. Configura i Parametri Corso</h3>
+                                        <ul>
+                                            <li><strong>Nome Corso:</strong> Inserisci il nome del corso</li>
+                                            <li><strong>Ore Totali:</strong> Durata totale del corso in ore</li>
+                                            <li><strong>Ore al Giorno:</strong> Ore di lezione per ogni giorno (da 3 a 7 ore)</li>
+                                            <li><strong>Tipo Lezione Default:</strong> Scegli se le lezioni sono "In Presenza" o "Online" (puoi modificare singolarmente dopo)</li>
+                                            <li><strong>Numero Docenti:</strong> Quanti docenti terranno il corso</li>
+                                            <li><strong>Orari:</strong> Orario di inizio e fine predefiniti</li>
+                                            <li><strong>Date Periodo:</strong> Seleziona il periodo in cui può svolgersi il corso</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📊 3. Distribuzione Ore</h3>
+                                        <p>Se le ore totali non sono divisibili perfettamente per le ore giornaliere, vedrai diverse opzioni di distribuzione. Scegli quella che preferisci.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📝 4. Programma Didattico</h3>
+                                        <p>Qui puoi personalizzare ogni singola lezione:</p>
+                                        <ul>
+                                            <li><strong>Modulo e Argomenti:</strong> Descrivi il contenuto di ogni lezione</li>
+                                            <li><strong>Tipo Lezione:</strong> Cambia da Presenza a Online se necessario per lezioni specifiche</li>
+                                            <li><strong>Orari:</strong> Personalizza gli orari per ogni lezione</li>
+                                            <li><strong>Pause:</strong> Aggiungi le pause pranzo o altre interruzioni</li>
+                                            <li><strong>Controllo Totale:</strong> Verifica che il totale ore corrisponda (indicatore verde ✅ = corretto)</li>
+                                        </ul>
+                                        <p><em>💡 Suggerimento: Le lezioni da 7 ore vengono pre-impostate automaticamente con orario 09:00-17:00 e pausa 13:00-14:00</em></p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>🚫 5. Date da Escludere</h3>
+                                        <ul>
+                                            <li>Le festività italiane 2026 sono già precaricate</li>
+                                            <li>Puoi aggiungere altre date da escludere (singole o periodi)</li>
+                                            <li>Utile per ferie, chiusure aziendali, ecc.</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>🎨 6. Genera Calendari</h3>
+                                        <p>Clicca su "Calcola Corsi e Genera Calendari" per vedere l'anteprima dei calendari per ogni docente.</p>
+                                        <p>Nelle anteprime vedrai:</p>
+                                        <ul>
+                                            <li>Data e giorno della settimana</li>
+                                            <li>Orari di ogni lezione</li>
+                                            <li>Ore totali</li>
+                                            <li>Tipo (🏫 Presenza / 🌐 Online)</li>
+                                            <li>Modulo e argomenti</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📥 7. Scarica Excel</h3>
+                                        <p>Clicca su "Scarica Tutti i Calendari (Excel)" per scaricare un file Excel con un foglio per ogni calendario generato.</p>
+                                        <p>Il file Excel contiene tutte le informazioni in formato professionale, pronto per essere condiviso.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>💡 Suggerimenti</h3>
+                                        <ul>
+                                            <li>Inizia sempre da un template se disponibile - risparmia tempo!</li>
+                                            <li>Controlla sempre il totale ore nel Programma Didattico prima di generare</li>
+                                            <li>Usa le pause per lezioni lunghe (7 ore) per rispettare le normative</li>
+                                            <li>Verifica le anteprime prima di scaricare l'Excel</li>
+                                        </ul>
+                                    </section>
+
+                                    <div style={{textAlign: 'center', marginTop: '2rem', padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem'}}>
+                                        <p style={{margin: 0, color: '#196C28', fontWeight: 'bold'}}>
+                                            Per qualsiasi dubbio o problema, contatta il supporto tecnico! 🚀
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
