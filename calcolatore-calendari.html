@@ -29,10 +29,21 @@
         }
 
         .header {
-            background: linear-gradient(to right, #111827, #1f2937);
+            background: linear-gradient(to right, #196C28, #1a7a2e);
             color: white;
             padding: 1.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .header-content {
+            flex: 1;
         }
 
         .header h1 {
@@ -46,6 +57,41 @@
         .header p {
             color: #d1d5db;
             margin-top: 0.5rem;
+        }
+
+        .header-logo {
+            height: 150px;
+            width: auto;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 0.5rem;
+            }
+
+            .header-logo {
+                height: 100px;
+                display: block !important;
+            }
+
+            .btn-guida {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
+            }
         }
 
         .section {
@@ -538,7 +584,7 @@
             .lezione-item {
                 flex-direction: column;
             }
-            
+
             .lezione-giorno,
             .lezione-modulo,
             .lezione-argomenti {
@@ -549,10 +595,178 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .footer {
+            background: linear-gradient(to right, #196C28, #1a7a2e);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .footer-text {
+            color: #d1d5db;
+        }
+
+        /* Pulsante Guida */
+        .btn-guida {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #196C28;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-guida:hover {
+            background-color: #1a7a2e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 800px;
+            max-height: 90vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            background: linear-gradient(to right, #196C28, #1a7a2e);
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .guida-section {
+            margin-bottom: 2rem;
+        }
+
+        .guida-section h3 {
+            color: #196C28;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .guida-section p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .guida-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .guida-section ul li {
+            color: #4b5563;
+            line-height: 1.8;
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .guida-section ul li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #196C28;
+            font-weight: bold;
+        }
+
+        .guida-section em {
+            background-color: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-style: normal;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                max-height: 95vh;
+                margin: 0.5rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .guida-section h3 {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
+
+    <div class="footer">
+        <p class="footer-text">Sviluppato da Roberto Schiraldi</p>
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
@@ -569,6 +783,7 @@
                 numeroDocenti: 2,
                 dataInizio: '',
                 dataFine: '',
+                tipoDefault: 'presenza',
             });
             
             const [programma, setProgramma] = useState([]);
@@ -577,6 +792,7 @@
             const [esclusioni, setEsclusioni] = useState([]);
             const [calendariEspansi, setCalendariEspansi] = useState([]);
             const [nomiDocenti, setNomiDocenti] = useState([]);
+            const [modificheOrari, setModificheOrari] = useState({});
             const [distribuzioneOre, setDistribuzioneOre] = useState({
                 modalita: 'automatica', // 'automatica' o 'personalizzata'
                 opzioneScelta: null, // indice opzione automatica scelta
@@ -593,6 +809,7 @@
             const [dataInizioPeriodo, setDataInizioPeriodo] = useState('');
             const [dataFinePeriodo, setDataFinePeriodo] = useState('');
             const [motivoEsclusione, setMotivoEsclusione] = useState('');
+            const [mostraGuida, setMostraGuida] = useState(false);
 
             // Festività italiane 2026
             const festivitaItaliane2026 = [
@@ -617,6 +834,7 @@
                     oreGiorno: 5,
                     orarioInizio: '09:00',
                     orarioFine: '14:00',
+                    tipoDefault: 'online',
                     programma: [
                         { giorno: 1, modulo: 'Modulo 1', argomenti: "Cos'è l'IA (storia, definizioni, ambiti). Tipologie di AI (Narrow, General, Generative)." },
                         { giorno: 2, modulo: 'Modulo 1', argomenti: 'Prompt Engineering (principi base). Panoramica strumenti AI (ChatGPT, Gemini, Copilot).' },
@@ -646,6 +864,7 @@
                     oreGiorno: 4,
                     orarioInizio: '09:00',
                     orarioFine: '13:00',
+                    tipoDefault: 'online',
                     programma: [
                         { giorno: 1, modulo: 'Settimana 1', argomenti: 'Introduzione Marketing e Logiche Digitali' },
                         { giorno: 2, modulo: 'Settimana 1', argomenti: 'Brand, Personal Brand e LinkedIn' },
@@ -674,6 +893,7 @@
                     oreGiorno: template.oreGiorno,
                     orarioInizio: template.orarioInizio,
                     orarioFine: template.orarioFine,
+                    tipoDefault: template.tipoDefault || 'presenza',
                 });
                 setProgramma([...template.programma]);
             };
@@ -744,20 +964,62 @@
             const generaLezioniVuote = (numLezioni) => {
                 // Non rigenerare se il numero è lo stesso
                 if (programma.length === numLezioni) return;
-                
+
+                const arrayOreGiornate = getArrayOreGiornate();
                 const nuoveProgramma = [];
                 for (let i = 0; i < numLezioni; i++) {
+                    const oreGiorno = arrayOreGiornate[i] || parametri.oreGiorno;
+
+                    let orarioInizio = parametri.orarioInizio;
+                    let orarioFine;
+                    let pausaInizio = '';
+                    let pausaFine = '';
+
+                    // Per lezioni da 7 ore, preimposta 09:00-17:00 con pausa 13:00-14:00
+                    if (oreGiorno === 7) {
+                        orarioInizio = '09:00';
+                        orarioFine = '17:00';
+                        pausaInizio = '13:00';
+                        pausaFine = '14:00';
+                    } else {
+                        // Calcola orario fine per altre durate
+                        const [oreInizio, minInizio] = parametri.orarioInizio.split(':').map(Number);
+                        const minutiInizio = oreInizio * 60 + minInizio;
+                        const minutiFine = minutiInizio + (oreGiorno * 60);
+                        const oreFine = Math.floor(minutiFine / 60);
+                        const minFine = minutiFine % 60;
+                        orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minFine).padStart(2, '0')}`;
+                    }
+
                     nuoveProgramma.push({
                         giorno: i + 1,
                         modulo: '',
-                        argomenti: ''
+                        argomenti: '',
+                        tipoLezione: parametri.tipoDefault || 'presenza',
+                        oreGiornata: oreGiorno,
+                        fasciaOraria: 'default',
+                        orarioInizio: orarioInizio,
+                        orarioFine: orarioFine,
+                        pausaInizio: pausaInizio,
+                        pausaFine: pausaFine
                     });
                 }
                 setProgramma(nuoveProgramma);
             };
 
             const aggiungiLezione = () => {
-                setProgramma([...programma, { giorno: programma.length + 1, modulo: '', argomenti: '' }]);
+                setProgramma([...programma, {
+                    giorno: programma.length + 1,
+                    modulo: '',
+                    argomenti: '',
+                    tipoLezione: parametri.tipoDefault || 'presenza',
+                    oreGiornata: null,
+                    fasciaOraria: 'default',
+                    orarioInizio: '',
+                    orarioFine: '',
+                    pausaInizio: '',
+                    pausaFine: ''
+                }]);
             };
 
             const rimuoviLezione = (index) => {
@@ -766,10 +1028,51 @@
                 setProgramma(nuovoProgramma);
             };
 
+            // Funzione per calcolare ore da orari e pausa
+            const calcolaOreGiornata = (orarioInizio, orarioFine, pausaInizio, pausaFine) => {
+                if (!orarioInizio || !orarioFine) return null;
+
+                const [oreI, minI] = orarioInizio.split(':').map(Number);
+                const [oreF, minF] = orarioFine.split(':').map(Number);
+                let minutiTotali = (oreF * 60 + minF) - (oreI * 60 + minI);
+
+                // Sottrai pausa se presente
+                if (pausaInizio && pausaFine) {
+                    const [orePI, minPI] = pausaInizio.split(':').map(Number);
+                    const [orePF, minPF] = pausaFine.split(':').map(Number);
+                    const minutiPausa = (orePF * 60 + minPF) - (orePI * 60 + minPI);
+                    minutiTotali -= minutiPausa;
+                }
+
+                return (minutiTotali / 60).toFixed(1);
+            };
+
             const aggiornaLezione = (index, campo, valore) => {
                 const nuovoProgramma = [...programma];
                 nuovoProgramma[index][campo] = valore;
+
+                // Ricalcola ore giornata quando cambiano orari o pausa
+                if (['orarioInizio', 'orarioFine', 'pausaInizio', 'pausaFine'].includes(campo)) {
+                    const lezione = nuovoProgramma[index];
+                    const ore = calcolaOreGiornata(
+                        lezione.orarioInizio,
+                        lezione.orarioFine,
+                        lezione.pausaInizio,
+                        lezione.pausaFine
+                    );
+                    if (ore !== null) {
+                        nuovoProgramma[index].oreGiornata = parseFloat(ore);
+                    }
+                }
+
                 setProgramma(nuovoProgramma);
+            };
+
+            // Funzione per calcolare il totale ore del programma
+            const calcolaTotaleOreProgramma = () => {
+                return programma.reduce((totale, lezione) => {
+                    return totale + (lezione.oreGiornata || 0);
+                }, 0);
             };
 
             const aggiungiEsclusione = () => {
@@ -924,6 +1227,41 @@
                 generaCalendari(corsiTotali, giorniNecessari);
             };
 
+            // Funzione per calcolare orari e ore in base ai parametri del modulo
+            const calcolaOrariLezione = (prog, arrayOreGiornate, giorniContati) => {
+                // Usa ore giornata dal programma (già calcolate automaticamente)
+                const oreGiornata = prog.oreGiornata || arrayOreGiornate[giorniContati] || parametri.oreGiorno;
+
+                // Determina orari
+                let orario;
+
+                // Se il programma ha orari impostati, usali
+                if (prog.orarioInizio && prog.orarioFine) {
+                    // Se c'è una pausa, genera orario con pausa
+                    if (prog.pausaInizio && prog.pausaFine) {
+                        orario = `${prog.orarioInizio}-${prog.pausaInizio} / ${prog.pausaFine}-${prog.orarioFine}`;
+                    } else {
+                        // Orario continuo
+                        orario = `${prog.orarioInizio} - ${prog.orarioFine}`;
+                    }
+                } else {
+                    // Default: calcola da parametri globali
+                    if (oreGiornata === 7) {
+                        orario = "09:00-13:00 / 14:00-17:00";
+                    } else {
+                        const [oreInizio, minutiInizio] = parametri.orarioInizio.split(':').map(Number);
+                        const minutiTotaliInizio = oreInizio * 60 + minutiInizio;
+                        const minutiTotaliFine = minutiTotaliInizio + (oreGiornata * 60);
+                        const oreFine = Math.floor(minutiTotaliFine / 60);
+                        const minutiFine = minutiTotaliFine % 60;
+                        const orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minutiFine).padStart(2, '0')}`;
+                        orario = `${parametri.orarioInizio} - ${orarioFine}`;
+                    }
+                }
+
+                return { orario, ore: oreGiornata };
+            };
+
             const generaCalendari = (numCorsi, giorniNecessari) => {
                 const calendariGenerati = [];
                 const arrayOreGiornate = getArrayOreGiornate();
@@ -942,32 +1280,18 @@
                             
                             if (parametri.giorni.includes(dayNum) && !isDataEsclusa(dataLezione)) {
                                 const prog = programma[giorniContati];
-                                const oreGiornata = arrayOreGiornate[giorniContati] || parametri.oreGiorno;
-                                
-                                // 🕐 GESTIONE ORARI con pausa pranzo per giornate da 7h
-                                let orario;
-                                if (oreGiornata === 7) {
-                                    // 7h = 4h mattina + 1h pausa + 3h pomeriggio
-                                    // 9:00-13:00 (4h) → PAUSA → 14:00-17:00 (3h)
-                                    orario = "09:00-13:00 / 14:00-17:00";
-                                } else {
-                                    // Calcola orario fine basato su ore giornata (continuo, senza pausa)
-                                    const [oreInizio, minutiInizio] = parametri.orarioInizio.split(':').map(Number);
-                                    const minutiTotaliInizio = oreInizio * 60 + minutiInizio;
-                                    const minutiTotaliFine = minutiTotaliInizio + (oreGiornata * 60);
-                                    const oreFine = Math.floor(minutiTotaliFine / 60);
-                                    const minutiFine = minutiTotaliFine % 60;
-                                    const orarioFine = `${String(oreFine).padStart(2, '0')}:${String(minutiFine).padStart(2, '0')}`;
-                                    orario = `${parametri.orarioInizio} - ${orarioFine}`;
-                                }
-                                
+
+                                // Usa la nuova funzione per calcolare orari e ore in base ai parametri del modulo
+                                const { orario, ore } = calcolaOrariLezione(prog, arrayOreGiornate, giorniContati);
+
                                 lezioni.push({
                                     data: new Date(dataLezione),
                                     giorno: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][dataLezione.getDay()],
                                     orario: orario,
-                                    ore: oreGiornata,
+                                    ore: ore,
                                     modulo: prog.modulo,
                                     argomenti: prog.argomenti,
+                                    tipoLezione: prog.tipoLezione || 'default'
                                 });
                                 giorniContati++;
                             }
@@ -997,7 +1321,7 @@
                     const worksheet = workbook.addWorksheet(calendario.nome.substring(0, 31));
                     
                     // Titolo (riga 1)
-                    worksheet.mergeCells('A1:F1');
+                    worksheet.mergeCells('A1:G1');
                     const titleCell = worksheet.getCell('A1');
                     titleCell.value = calendario.nome;
                     titleCell.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
@@ -1008,9 +1332,9 @@
                     };
                     titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
                     worksheet.getRow(1).height = 25;
-                    
+
                     // Sottotitolo (riga 2)
-                    worksheet.mergeCells('A2:F2');
+                    worksheet.mergeCells('A2:G2');
                     const subtitleCell = worksheet.getCell('A2');
                     subtitleCell.value = `Periodo: ${calendario.dataInizio.toLocaleDateString('it-IT')} - ${parametri.nomeCorso} (${parametri.oreTotali} Ore)`;
                     subtitleCell.font = { size: 11, color: { argb: 'FF374151' } };
@@ -1022,7 +1346,7 @@
                     
                     // Header (riga 4)
                     const headerRow = worksheet.getRow(4);
-                    const headers = ['Data', 'Giorno', 'Orario', 'Ore', 'Modulo', 'Argomenti'];
+                    const headers = ['Data', 'Giorno', 'Orario', 'Ore', 'Tipo', 'Modulo', 'Argomenti'];
                     headers.forEach((header, colIdx) => {
                         const cell = headerRow.getCell(colIdx + 1);
                         cell.value = header;
@@ -1048,12 +1372,18 @@
                         const row = worksheet.getRow(rowNum);
                         const isEven = lezioneIdx % 2 === 0;
                         const bgColor = isEven ? 'FFFFFFFF' : 'FFF9FAFB';
-                        
+
+                        // Ottieni orari modificati o originali
+                        const orari = getOrarioLezione(idx, lezioneIdx, lezione);
+                        // Usa l'orario originale che include la pausa formattata correttamente
+                        const orarioCompleto = lezione.orario;
+
                         const rowData = [
                             lezione.data.toLocaleDateString('it-IT'),
                             lezione.giorno,
-                            lezione.orario,
-                            lezione.ore,
+                            orarioCompleto,
+                            orari.ore,
+                            lezione.tipoLezione === 'online' ? 'Online' : 'Presenza',
                             lezione.modulo,
                             lezione.argomenti
                         ];
@@ -1066,10 +1396,10 @@
                                 pattern: 'solid',
                                 fgColor: { argb: bgColor }
                             };
-                            cell.alignment = { 
-                                vertical: 'top', 
-                                horizontal: colIdx === 3 ? 'center' : 'left',
-                                wrapText: colIdx === 5
+                            cell.alignment = {
+                                vertical: 'top',
+                                horizontal: (colIdx === 3 || colIdx === 4) ? 'center' : 'left',
+                                wrapText: colIdx === 6
                             };
                             cell.border = {
                                 top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
@@ -1085,8 +1415,9 @@
                     // Riga TOTALE (ultima riga)
                     const totaleRowNum = calendario.lezioni.length + 5;
                     const totaleRow = worksheet.getRow(totaleRowNum);
-                    
-                    ['', '', 'TOTALE ORE:', parametri.oreTotali, '', ''].forEach((value, colIdx) => {
+                    const totaleOreCalendario = calcolaTotaleOreCalendario(idx);
+
+                    ['', '', 'TOTALE ORE:', totaleOreCalendario, '', ''].forEach((value, colIdx) => {
                         const cell = totaleRow.getCell(colIdx + 1);
                         cell.value = value;
                         cell.font = { bold: true, size: 11 };
@@ -1110,8 +1441,9 @@
                     worksheet.getColumn(2).width = 12;
                     worksheet.getColumn(3).width = 15;
                     worksheet.getColumn(4).width = 8;
-                    worksheet.getColumn(5).width = 20;
-                    worksheet.getColumn(6).width = 60;
+                    worksheet.getColumn(5).width = 12;
+                    worksheet.getColumn(6).width = 20;
+                    worksheet.getColumn(7).width = 60;
                 });
                 
                 const buffer = await workbook.xlsx.writeBuffer();
@@ -1126,6 +1458,82 @@
                 } else {
                     setCalendariEspansi([...calendariEspansi, indice]);
                 }
+            };
+
+            // Funzione per calcolare ore dalla differenza tra orari
+            const calcolaOreDaOrari = (orarioInizio, orarioFine) => {
+                if (!orarioInizio || !orarioFine) return 0;
+                const [oreI, minI] = orarioInizio.split(':').map(Number);
+                const [oreF, minF] = orarioFine.split(':').map(Number);
+                const minutiInizio = oreI * 60 + minI;
+                const minutiFine = oreF * 60 + minF;
+                return ((minutiFine - minutiInizio) / 60).toFixed(1);
+            };
+
+            // Funzione per modificare l'orario di una lezione
+            const modificaOrarioLezione = (calendarioIdx, lezioneIdx, campo, valore) => {
+                const chiave = `${calendarioIdx}-${lezioneIdx}`;
+                const modificaCorrente = modificheOrari[chiave] || {};
+
+                const nuovaModifica = {
+                    ...modificaCorrente,
+                    [campo]: valore
+                };
+
+                // Calcola le ore se abbiamo entrambi gli orari
+                if (nuovaModifica.orarioInizio && nuovaModifica.orarioFine) {
+                    nuovaModifica.ore = calcolaOreDaOrari(nuovaModifica.orarioInizio, nuovaModifica.orarioFine);
+                }
+
+                setModificheOrari({
+                    ...modificheOrari,
+                    [chiave]: nuovaModifica
+                });
+            };
+
+            // Funzione per ottenere l'orario di una lezione (modificato o originale)
+            const getOrarioLezione = (calendarioIdx, lezioneIdx, lezione) => {
+                const chiave = `${calendarioIdx}-${lezioneIdx}`;
+                const modifica = modificheOrari[chiave];
+
+                if (modifica && modifica.orarioInizio && modifica.orarioFine) {
+                    return {
+                        orarioInizio: modifica.orarioInizio,
+                        orarioFine: modifica.orarioFine,
+                        ore: parseFloat(modifica.ore)
+                    };
+                }
+
+                // Parsing orario originale
+                let orarioInizio, orarioFine;
+                if (lezione.orario.includes('/')) {
+                    // Formato con pausa: "09:00-13:00 / 14:00-17:00"
+                    const parti = lezione.orario.split(' / ');
+                    orarioInizio = parti[0].split('-')[0].trim();
+                    orarioFine = parti[1].split('-')[1].trim();
+                } else {
+                    // Formato continuo: "09:00 - 14:00"
+                    const parti = lezione.orario.split(' - ');
+                    orarioInizio = parti[0].trim();
+                    orarioFine = parti[1].trim();
+                }
+
+                return {
+                    orarioInizio,
+                    orarioFine,
+                    ore: lezione.ore
+                };
+            };
+
+            // Funzione per calcolare il totale ore di un calendario
+            const calcolaTotaleOreCalendario = (calendarioIdx) => {
+                const calendario = calendari[calendarioIdx];
+                if (!calendario) return 0;
+
+                return calendario.lezioni.reduce((totale, lezione, lezioneIdx) => {
+                    const orari = getOrarioLezione(calendarioIdx, lezioneIdx, lezione);
+                    return totale + orari.ore;
+                }, 0);
             };
 
             const aggiornaNumeroDocenti = (numero) => {
@@ -1379,13 +1787,28 @@
                 <div>
                     <div className="header">
                         <div className="container">
-                            <h1>
-                                <svg className="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Generatore Calendari Corsi 2026
-                            </h1>
-                            <p>SONODIGITALE - Tool per Arianna @ Atoma srl</p>
+                            <div className="header-content">
+                                <h1>
+                                    <svg className="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Generatore Calendari Corsi 2026
+                                </h1>
+                                <p>SONODIGITALE - Tool per Arianna @ Atoma srl</p>
+                            </div>
+                            <div className="header-actions">
+                                <button
+                                    onClick={() => setMostraGuida(true)}
+                                    className="btn-guida"
+                                    title="Apri guida utente"
+                                >
+                                    <svg style={{width: '20px', height: '20px', marginRight: '0.5rem'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    Guida
+                                </button>
+                                <img src="SONODIGITALE INTERO.svg" alt="SONODIGITALE Logo" className="header-logo" />
+                            </div>
                         </div>
                     </div>
 
@@ -1498,6 +1921,18 @@
                                         min="1"
                                         max="10"
                                     />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Tipo Lezione Default</label>
+                                    <select
+                                        value={parametri.tipoDefault}
+                                        onChange={(e) => setParametri({ ...parametri, tipoDefault: e.target.value })}
+                                        className="form-select"
+                                        style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', fontSize: '0.875rem'}}
+                                    >
+                                        <option value="presenza">🏫 In Presenza</option>
+                                        <option value="online">🌐 Online</option>
+                                    </select>
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Orario Inizio</label>
@@ -1909,29 +2344,115 @@
 
                                 <div className="programma-container">
                                     {programma.map((lezione, index) => (
-                                        <div key={index} className="lezione-item">
-                                            <div className="lezione-giorno">Giorno {lezione.giorno}</div>
-                                            <input
-                                                type="text"
-                                                value={lezione.modulo}
-                                                onChange={(e) => aggiornaLezione(index, 'modulo', e.target.value)}
-                                                className="form-input lezione-modulo"
-                                                placeholder="Modulo"
-                                            />
+                                        <div key={index} style={{marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem', border: '2px solid #e5e7eb'}}>
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem'}}>
+                                                <div style={{fontWeight: 'bold', fontSize: '1rem', minWidth: '80px', color: '#196C28'}}>Giorno {lezione.giorno}</div>
+                                                <input
+                                                    type="text"
+                                                    value={lezione.modulo}
+                                                    onChange={(e) => aggiornaLezione(index, 'modulo', e.target.value)}
+                                                    className="form-input"
+                                                    placeholder="Nome Modulo"
+                                                    style={{flex: 1}}
+                                                />
+                                                <div style={{fontSize: '0.875rem', fontWeight: 'bold', color: lezione.oreGiornata ? '#196C28' : '#999', minWidth: '60px', textAlign: 'right'}}>
+                                                    {lezione.oreGiornata ? `${lezione.oreGiornata}h` : '—'}
+                                                </div>
+                                                <button onClick={() => rimuoviLezione(index)} className="btn btn-remove">
+                                                    <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                             <input
                                                 type="text"
                                                 value={lezione.argomenti}
                                                 onChange={(e) => aggiornaLezione(index, 'argomenti', e.target.value)}
-                                                className="form-input lezione-argomenti"
+                                                className="form-input"
                                                 placeholder="Argomenti della lezione"
+                                                style={{marginBottom: '0.75rem'}}
                                             />
-                                            <button onClick={() => rimuoviLezione(index)} className="btn btn-remove">
-                                                <svg style={{width: '16px', height: '16px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+
+                                            <div style={{marginBottom: '0.75rem'}}>
+                                                <label style={{display: 'block', fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.25rem'}}>Tipo Lezione</label>
+                                                <select
+                                                    value={lezione.tipoLezione || 'presenza'}
+                                                    onChange={(e) => aggiornaLezione(index, 'tipoLezione', e.target.value)}
+                                                    className="form-select"
+                                                    style={{width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #d1d5db'}}
+                                                >
+                                                    <option value="presenza">🏫 In Presenza</option>
+                                                    <option value="online">🌐 Online</option>
+                                                </select>
+                                            </div>
+
+                                            <div style={{backgroundColor: 'white', padding: '0.75rem', borderRadius: '0.375rem', marginBottom: '0.75rem'}}>
+                                                <div style={{fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.5rem'}}>⏰ ORARI</div>
+                                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Inizio</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.orarioInizio || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'orarioInizio', e.target.value)}
+                                                            className="form-input"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Fine</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.orarioFine || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'orarioFine', e.target.value)}
+                                                            className="form-input"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Pausa Da</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.pausaInizio || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'pausaInizio', e.target.value)}
+                                                            className="form-input"
+                                                            placeholder="Opzionale"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{display: 'block', fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem'}}>Pausa A</label>
+                                                        <input
+                                                            type="time"
+                                                            value={lezione.pausaFine || ''}
+                                                            onChange={(e) => aggiornaLezione(index, 'pausaFine', e.target.value)}
+                                                            className="form-input"
+                                                            placeholder="Opzionale"
+                                                            style={{width: '100%', padding: '0.375rem', fontSize: '0.875rem'}}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
+                                </div>
+
+                                {/* Totale Ore */}
+                                <div style={{
+                                    marginTop: '1.5rem',
+                                    padding: '1rem',
+                                    backgroundColor: calcolaTotaleOreProgramma() === parametri.oreTotali ? '#d1fae5' : '#fee2e2',
+                                    borderRadius: '0.5rem',
+                                    border: `2px solid ${calcolaTotaleOreProgramma() === parametri.oreTotali ? '#196C28' : '#dc2626'}`,
+                                    textAlign: 'center',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {calcolaTotaleOreProgramma() === parametri.oreTotali ? '✅' : '⚠️'} Totale Ore Programma: {calcolaTotaleOreProgramma()}h / {parametri.oreTotali}h
+                                    {calcolaTotaleOreProgramma() !== parametri.oreTotali && (
+                                        <div style={{fontSize: '0.875rem', marginTop: '0.5rem', color: '#dc2626'}}>
+                                            Differenza: {(calcolaTotaleOreProgramma() - parametri.oreTotali).toFixed(1)}h
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -2009,6 +2530,7 @@
                                                                         <th>Giorno</th>
                                                                         <th>Orario</th>
                                                                         <th>Ore</th>
+                                                                        <th>Tipo</th>
                                                                         <th>Modulo</th>
                                                                         <th>Argomenti</th>
                                                                     </tr>
@@ -2020,6 +2542,9 @@
                                                                             <td>{lezione.giorno}</td>
                                                                             <td>{lezione.orario}</td>
                                                                             <td style={{textAlign: 'center'}}>{lezione.ore}h</td>
+                                                                            <td style={{textAlign: 'center'}}>
+                                                                                {lezione.tipoLezione === 'online' ? '🌐' : '🏫'}
+                                                                            </td>
                                                                             <td>{lezione.modulo}</td>
                                                                             <td style={{fontSize: '0.75rem'}}>
                                                                                 {isEspanso ? lezione.argomenti : (
@@ -2064,6 +2589,111 @@
                             </div>
                         )}
                     </div>
+
+                    {/* Modale Guida */}
+                    {mostraGuida && (
+                        <div className="modal-overlay" onClick={() => setMostraGuida(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>📖 Guida Utente - Generatore Calendari Corsi</h2>
+                                    <button className="modal-close" onClick={() => setMostraGuida(false)}>
+                                        <svg style={{width: '24px', height: '24px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <section className="guida-section">
+                                        <h3>🎯 Introduzione</h3>
+                                        <p>Benvenuta! Questo strumento ti permette di generare automaticamente i calendari dei corsi per l'anno 2026.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📋 1. Scegli Template o Corso Personalizzato</h3>
+                                        <ul>
+                                            <li><strong>Template preconfigurati:</strong> Clicca su "AI Start" o "Social Media Manager" per caricare corsi già impostati</li>
+                                            <li><strong>Corso personalizzato:</strong> Clicca su "Personalizzato" per creare un corso da zero</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>⚙️ 2. Configura i Parametri Corso</h3>
+                                        <ul>
+                                            <li><strong>Nome Corso:</strong> Inserisci il nome del corso</li>
+                                            <li><strong>Ore Totali:</strong> Durata totale del corso in ore</li>
+                                            <li><strong>Ore al Giorno:</strong> Ore di lezione per ogni giorno (da 3 a 7 ore)</li>
+                                            <li><strong>Tipo Lezione Default:</strong> Scegli se le lezioni sono "In Presenza" o "Online" (puoi modificare singolarmente dopo)</li>
+                                            <li><strong>Numero Docenti:</strong> Quanti docenti terranno il corso</li>
+                                            <li><strong>Orari:</strong> Orario di inizio e fine predefiniti</li>
+                                            <li><strong>Date Periodo:</strong> Seleziona il periodo in cui può svolgersi il corso</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📊 3. Distribuzione Ore</h3>
+                                        <p>Se le ore totali non sono divisibili perfettamente per le ore giornaliere, vedrai diverse opzioni di distribuzione. Scegli quella che preferisci.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📝 4. Programma Didattico</h3>
+                                        <p>Qui puoi personalizzare ogni singola lezione:</p>
+                                        <ul>
+                                            <li><strong>Modulo e Argomenti:</strong> Descrivi il contenuto di ogni lezione</li>
+                                            <li><strong>Tipo Lezione:</strong> Cambia da Presenza a Online se necessario per lezioni specifiche</li>
+                                            <li><strong>Orari:</strong> Personalizza gli orari per ogni lezione</li>
+                                            <li><strong>Pause:</strong> Aggiungi le pause pranzo o altre interruzioni</li>
+                                            <li><strong>Controllo Totale:</strong> Verifica che il totale ore corrisponda (indicatore verde ✅ = corretto)</li>
+                                        </ul>
+                                        <p><em>💡 Suggerimento: Le lezioni da 7 ore vengono pre-impostate automaticamente con orario 09:00-17:00 e pausa 13:00-14:00</em></p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>🚫 5. Date da Escludere</h3>
+                                        <ul>
+                                            <li>Le festività italiane 2026 sono già precaricate</li>
+                                            <li>Puoi aggiungere altre date da escludere (singole o periodi)</li>
+                                            <li>Utile per ferie, chiusure aziendali, ecc.</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>🎨 6. Genera Calendari</h3>
+                                        <p>Clicca su "Calcola Corsi e Genera Calendari" per vedere l'anteprima dei calendari per ogni docente.</p>
+                                        <p>Nelle anteprime vedrai:</p>
+                                        <ul>
+                                            <li>Data e giorno della settimana</li>
+                                            <li>Orari di ogni lezione</li>
+                                            <li>Ore totali</li>
+                                            <li>Tipo (🏫 Presenza / 🌐 Online)</li>
+                                            <li>Modulo e argomenti</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>📥 7. Scarica Excel</h3>
+                                        <p>Clicca su "Scarica Tutti i Calendari (Excel)" per scaricare un file Excel con un foglio per ogni calendario generato.</p>
+                                        <p>Il file Excel contiene tutte le informazioni in formato professionale, pronto per essere condiviso.</p>
+                                    </section>
+
+                                    <section className="guida-section">
+                                        <h3>💡 Suggerimenti</h3>
+                                        <ul>
+                                            <li>Inizia sempre da un template se disponibile - risparmia tempo!</li>
+                                            <li>Controlla sempre il totale ore nel Programma Didattico prima di generare</li>
+                                            <li>Usa le pause per lezioni lunghe (7 ore) per rispettare le normative</li>
+                                            <li>Verifica le anteprime prima di scaricare l'Excel</li>
+                                        </ul>
+                                    </section>
+
+                                    <div style={{textAlign: 'center', marginTop: '2rem', padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem'}}>
+                                        <p style={{margin: 0, color: '#196C28', fontWeight: 'bold'}}>
+                                            Per qualsiasi dubbio o problema, contatta il supporto tecnico! 🚀
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
